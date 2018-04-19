@@ -7,11 +7,14 @@ namespace sfmsimulator::pointclassifier {
 
 class PC_Triangulationerror : Pointclassifier {
  public:
-  void classify(points::Points2d image_points_frame_1,
-                points::Points2d image_points_frame_2,
-                points::Points3d world_points_frame_1,
-                points::Points3d world_points_frame_2);
-  void cluster(points::Points2d image_points, std::vector<bool> type);
+  const std::vector<bool> classify(
+      const std::shared_ptr<points::Points2d> image_points_frame_1,
+      const std::shared_ptr<points::Points2d> image_points_frame_2,
+      const std::shared_ptr<points::Points3d> world_points_frame_1,
+      const std::shared_ptr<points::Points3d> world_points_frame_2) const;
+
+  void cluster(const points::Points2d image_points,
+               const std::vector<bool> type) const;
 
  private:
 };

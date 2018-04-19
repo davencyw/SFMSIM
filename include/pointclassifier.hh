@@ -1,25 +1,32 @@
 #ifndef __POINTCLASSIFIER_HH__
 #define __POINTCLASSIFIER_HH__
 
+#include "cameramodel.hh"
+#include "global.hh"
 #include "points.hh"
 
 #include <vector>
 
 namespace sfmsimulator::pointclassifier {
 
+enum Pointclassifier_type { PC_Triangulationerror };
+
 // TODO(dave): create class for clustering!
 class Pointclassifier {
  public:
   // classifies points into static and dynamic points
-  virtual void classify(points::Points2d image_points_frame_1,
-                        points::Points2d image_points_frame_2,
-                        points::Points3d world_points_frame_1,
-                        points::Points3d world_points_frame_2) = 0;
+  virtual const std::vector<bool> classify(
+      const std::shared_ptr<points::Points2d> image_points_frame_1,
+      const std::shared_ptr<points::Points2d> image_points_frame_2,
+      const std::shared_ptr<points::Points3d> world_points_frame_1,
+      const std::shared_ptr<points::Points3d> world_points_frame_2) const = 0;
+
   // clusters dynamic points specified in type and creates convex hull
-  virtual void cluster(points::Points2d image_points,
-                       std::vector<bool> type) = 0;
+  virtual void cluster(const points::Points2d image_points,
+                       const std::vector<bool> type) const = 0;
 
  private:
+  const cameramodel::Cameramodel _cameramodel;
 };
 
 }  // namespace sfmsimulator::pointclassifier

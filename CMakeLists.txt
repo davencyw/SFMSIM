@@ -45,6 +45,7 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -
 ##LIBRARIES
 ##
 
+enable_testing()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
@@ -56,8 +57,6 @@ include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(include)
 #include_directories(ext)
 
-
-##DIR
 SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/dll)
 SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -83,7 +82,8 @@ file(GLOB MAINSOURCES
 )
 
 file (GLOB TESTSOURCES
-    tests/test_main.cc
+  tests/test_main.cc
+  tests/testing_geometry.cc
 )
 
 
@@ -106,3 +106,9 @@ target_link_libraries(${PROJECT_NAME} pointclassifier visualizer sfmsimulator fr
 
 add_executable (runtests ${TESTSOURCES})
 target_link_libraries(runtests ${GTEST_LIBRARIES} pthread)
+
+##___________________________
+##
+##TESTING
+##
+add_test(Tests runtests)

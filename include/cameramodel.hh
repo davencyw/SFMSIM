@@ -9,7 +9,9 @@ namespace sfmsimulator::cameramodel {
 
 class Cameramodel {
  public:
-  cv::Matx33d getK() { return cv::Matx33d(_f, 0, _cx, 0, _f, _cy, 0, 0, 1); }
+  const cv::Matx33d getK() const {
+    return cv::Matx33d(_f, 0, _cx, 0, _f, _cy, 0, 0, 1);
+  }
 
  private:
   precision_t _f;

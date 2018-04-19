@@ -48,6 +48,7 @@ class Framesimulator {
     } else {
       std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
     };
+    fstream_3d_static_landmarks.close();
 
     // start opening dynamic landmark poses file
     _fstream_3d_dynamic_landmarks->open(_file_3d_dynamic_landmarks);

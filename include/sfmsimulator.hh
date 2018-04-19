@@ -28,28 +28,8 @@ struct Sfmconfig {
 
 class Sfmsimulator {
  public:
-  Sfmsimulator(Sfmconfig config)
-      : _config(config),
-        _cameramodel(config.cameramodel),
-        _framesimulator(framesimulator::Framesimulator(config.filepaths,
-                                                       config.cameramodel)) {
-    std::cout
-        << "\n\n\n\n"
-        << "            __\n"
-        << "     ___   / _|  _ __ ___      \n"
-        << "    / __| | |_  | '_ ` _ \\     \n"
-        << "    \\__ \\ |  _| | | | | | |     \n"
-        << "    |___/ |_|   |_| |_| |_|   \n\n"
-        << "           _                       _           _\n"
-        << "     ___  (_)  _ __ ___    _   _  | |   __ _  | |_    ___    _ __ "
-        << "\n    / __| | | | '_ ` _ \\  | | | | | |  / _` | | __|  / _ \\  | "
-        << "'__|\n"
-        << "    \\__ \\ | | | | | | | | | |_| | | | | (_| | | |_  | (_) | | |  "
-        << " \n"
-        << "    |___/ |_| |_| |_| |_|  \\__,_| |_|  \\__,_|  \\__|  \\___/  "
-        << "|_| \n\n\n\n"
-        << "     i n i t i a l i z i n g . . .\n\n\n\n\n\n\n";
-  }
+  Sfmsimulator(Sfmconfig config);
+
   // TODO(dave): write run
   void run();
   void doSteps(const size_t steps);

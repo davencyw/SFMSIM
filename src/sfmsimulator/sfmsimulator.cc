@@ -1,4 +1,5 @@
 #include "sfmsimulator.hh"
+#include "pc_triangulationerror.hh"
 
 #include <opencv2/core/core.hpp>
 //#include <opencv2/sfm.hpp>
@@ -12,6 +13,17 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       _cameramodel(config.cameramodel),
       _framesimulator(framesimulator::Framesimulator(config.filepaths,
                                                      config.cameramodel)) {
+  using pct = pointclassifier::Pointclassifier_type;
+
+  switch (config.type_pointclassifier) {
+    case pct::PC_Triangulationerror_t:
+      _pointclassifier = std::make_unique<pointclassifier::Pointclassifier>(
+          pointclassifier::PC_Triangulationerror(_cameramodel));
+      break;
+    default:
+      break;
+  }
+
   std::cout
       << "\n\n\n\n"
       << "            __\n"

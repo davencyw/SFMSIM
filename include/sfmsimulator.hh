@@ -34,8 +34,8 @@ class Sfmsimulator {
   void run();
   void doSteps(const size_t steps);
   void step();
-  void enablevisualization() { _visualize = true; }
-  void disablevisualization() { _visualize = false; }
+  inline void enablevisualization() { _visualize = true; }
+  inline void disablevisualization() { _visualize = false; }
 
   ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
 

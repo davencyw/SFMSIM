@@ -24,7 +24,7 @@ class Cameramodel {
         _cy(cy),
         _imageplane(Imageplane(image_width, image_height)) {}
 
-  const cv::Matx33d getK() const {
+  const inline cv::Matx33d getK() const {
     return cv::Matx33d(_f, 0, _cx, 0, _f, _cy, 0, 0, 1);
   }
 

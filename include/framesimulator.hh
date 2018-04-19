@@ -29,7 +29,9 @@ class Framesimulator {
 
   // projects current landmarks onto image plan of camerapose
   points::Points2d step_GetImagePoints();
-  const size_t updatesLeft() const { return _header_camera_poses - _steps; }
+  const inline size_t updatesLeft() const {
+    return _header_camera_poses - _steps;
+  }
 
  private:
   // updates all 3d landmarks in the scene at the current step

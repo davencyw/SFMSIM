@@ -10,6 +10,7 @@ namespace sfmsimulator::points {
 
 // struct for 2d feature points at timestep
 struct Points2d {
+  Points2d() = default;
   Points2d(size_t numpoints) : numpoints(numpoints) {
     coord[0] = array_t(numpoints);
     coord[1] = array_t(numpoints);
@@ -30,6 +31,7 @@ struct Syntheticpoints : public Points2d {
 
 // struct for 3d feature points at timestep
 struct Points3d {
+  Points3d() = default;
   Points3d(size_t numpoints) : numpoints(numpoints) {
     coord[0] = array_t(numpoints);
     coord[1] = array_t(numpoints);

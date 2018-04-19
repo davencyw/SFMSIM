@@ -22,6 +22,7 @@ struct Sfmconfig {
 
 class Sfmsimulator {
  public:
+  // TODO(dave): write run
   void run();
 
  private:

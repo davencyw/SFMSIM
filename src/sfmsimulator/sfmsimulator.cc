@@ -7,7 +7,8 @@
 
 namespace sfmsimulator {
 
-mat44_t Sfmsimulator::reconstruct(
+// TODO(dave): figure out return type and what to return.
+void Sfmsimulator::reconstruct(
     std::shared_ptr<points::Points2d> points_frame1,
     std::shared_ptr<points::Points2d> points_frame2) {
   std::vector<cv::Mat> points_collapsed;
@@ -35,7 +36,12 @@ mat44_t Sfmsimulator::reconstruct(
   points_collapsed.push_back(frame1);
   points_collapsed.push_back(frame2);
 
+  cv::Matx33d K = _cameramodel.getK();
+
   std::vector<cv::Mat> Rs_est, ts_est, points3d_estimated;
+  bool is_projective(true);
+  // cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est,
+  // points3points3d_estimated, is_projective);
 }
 
 }  // namespace sfmsimulator

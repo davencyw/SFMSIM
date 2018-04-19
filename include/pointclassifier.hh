@@ -5,8 +5,8 @@ namespace sfmsimulator::pointclassifier {
 
 class Pointclassifier {
  public:
-  void classify();
-  void cluster();
+  virtual void classify() = 0;
+  virtual void cluster() = 0;
 
  private:
 };

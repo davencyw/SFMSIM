@@ -103,7 +103,6 @@ add_executable (${PROJECT_NAME}  ${MAINSOURCES})
 
 target_link_libraries(${PROJECT_NAME} pointclassifier visualizer sfmsimulator framesim)
 
-
 add_executable (runtests ${TESTSOURCES})
 target_link_libraries(runtests ${GTEST_LIBRARIES} pthread)
 
@@ -111,4 +110,10 @@ target_link_libraries(runtests ${GTEST_LIBRARIES} pthread)
 ##
 ##TESTING
 ##
-add_test(Tests runtests)
+set(UNIT_TEST runtests)
+add_custom_command(
+     TARGET ${UNIT_TEST}
+     COMMENT "Run tests"
+     POST_BUILD
+     COMMAND ${UNIT_TEST}
+)

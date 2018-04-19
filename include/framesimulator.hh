@@ -110,11 +110,6 @@ class Framesimulator {
   // number of executed steps / updates
   size_t _steps = 0;
 
-  // position data
-  array_t _xposition_3d_static_landmarks;
-  array_t _yposition_3d_static_landmarks;
-  array_t _zposition_3d_static_landmarks;
-
   // all landmarks
   points::Points3d _scene_3d_points;
 

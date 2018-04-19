@@ -8,6 +8,7 @@
 namespace sfmsimulator {
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
+  // TODO(dave): check initial step, which does not need an update
   doSteps(steps);
 }
 
@@ -18,7 +19,13 @@ void Sfmsimulator::doSteps(const size_t steps) {
 }
 
 void Sfmsimulator::step() {
+  std::cout << " - STEP[ " << _step << " ]\n";
+
+  const points::Points2d image_points = _framesimulator.step_GetImagePoints();
+
   // TODO(dave): implement: reconstruct - classify - reconstruct
+
+  ++_step;
 }
 
 // TODO(dave): figure out return type and what to return.

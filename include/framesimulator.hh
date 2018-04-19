@@ -34,7 +34,8 @@ class Framesimulator {
     if (_fstream_camera_poses->good()) {
       *_fstream_camera_poses >> _header_camera_poses;
     } else {
-      std::cout << "\n\nF A I L E D  READING CAMERA_POSES!\n\n\n";
+      std::cout << "\n\nF A I L E D  READING CAMERA_POSES!\n"
+                << _file_camera_poses << "\n\n";
     };
 
     // start opening dynamic landmark poses file
@@ -86,11 +87,14 @@ class Framesimulator {
 
   // projects current landmarks onto image plan of camerapose
   points::Points2d step_GetImagePoints();
-  const size_t updatesLeft() const { return _header_camera_poses - _steps - 1; }
+  const size_t updatesLeft() const { return _header_camera_poses - _steps; }
 
  private:
-  // returns all 3d landmarks in the scene at the current step
+  // updates all 3d landmarks in the scene at the current step
   void update3dScenePoints();
+
+  // update camerapose to current pose
+  void updateCameraPose();
 
   // filepaths
   const std::string _file_camera_poses;

@@ -23,9 +23,18 @@ void Framesimulator::update3dScenePoints() {
   ++_steps;
 }
 
+void Framesimulator::updateCameraPose() {}
+
 points::Points2d Framesimulator::step_GetImagePoints() {
-  // project all landmarks at current 3d poses onto imageplane
+  // read next poses of dynamic landmarks
   update3dScenePoints();
+
+  // TODO(dave): next poses of camera
+
+  // TODO(dave):project all landmarks at current 3d poses onto imageplane
+  points::Points2d projected;
+
+  return projected;
 }
 
 }  // namespace sfmsimulator::framesimulator

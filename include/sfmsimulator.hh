@@ -7,6 +7,7 @@
 #include "pointclassifier.hh"
 #include "points.hh"
 
+#include <iostream>
 #include <memory>
 
 namespace sfmsimulator {
@@ -31,7 +32,24 @@ class Sfmsimulator {
       : _config(config),
         _cameramodel(config.cameramodel),
         _framesimulator(framesimulator::Framesimulator(config.filepaths,
-                                                       config.cameramodel)) {}
+                                                       config.cameramodel)) {
+    std::cout
+        << "\n\n\n\n"
+        << "            __\n"
+        << "     ___   / _|  _ __ ___      \n"
+        << "    / __| | |_  | '_ ` _ \\     \n"
+        << "    \\__ \\ |  _| | | | | | |     \n"
+        << "    |___/ |_|   |_| |_| |_|   \n\n"
+        << "           _                       _           _\n"
+        << "     ___  (_)  _ __ ___    _   _  | |   __ _  | |_    ___    _ __ "
+        << "\n    / __| | | | '_ ` _ \\  | | | | | |  / _` | | __|  / _ \\  | "
+        << "'__|\n"
+        << "    \\__ \\ | | | | | | | | | |_| | | | | (_| | | |_  | (_) | | |  "
+        << " \n"
+        << "    |___/ |_| |_| |_| |_|  \\__,_| |_|  \\__,_|  \\__|  \\___/  "
+        << "|_| \n\n\n\n"
+        << "     i n i t i a l i z i n g . . .\n\n\n\n\n\n\n";
+  }
   // TODO(dave): write run
   void run();
   void doSteps(const size_t steps);
@@ -39,13 +57,15 @@ class Sfmsimulator {
   void enablevisualization() { _visualize = true; }
   void disablevisualization() { _visualize = false; }
 
+  ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
+
  private:
   // calls opencv::sfm::reconstruct to estimate camera odometry and 3d landmarks
   void reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                    std::shared_ptr<points::Points2d> points_frame2);
 
   const Sfmconfig _config;
-  const framesimulator::Framesimulator _framesimulator;
+  framesimulator::Framesimulator _framesimulator;
   const cameramodel::Cameramodel _cameramodel;
 
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;

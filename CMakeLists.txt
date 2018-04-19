@@ -1,0 +1,108 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(sfmsimulation)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+EXECUTE_PROCESS( COMMAND gcc -dumpversion GCC_VERSION )
+EXECUTE_PROCESS( COMMAND g++ -dumpversion GCC_VERSION )
+
+##___________________________
+##
+##BUILD TYPE
+##
+
+# SET default build type to release for single generators
+if (NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE "RELEASE" FORCE)
+endif ()
+
+SET (CMAKE_BUILD_TYPE "RELEASE")
+
+message("mode")
+message("${CMAKE_BUILD_TYPE}")
+message("___________________")
+message("___________________")
+message("___________________")
+
+##___________________________
+##
+##BENCHMARKING
+##
+
+##___________________________
+##
+##FLAGS
+##
+
+SET (RELEASE_FLAGS "-O3 -march=native  -mtune=native -mavx2 -mavx -msse -ftree-vectorize")
+
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
+
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -lboost_program_options -lboost_filesystem -lboost_system ")
+## -fopt-info-vec-optimized
+
+##___________________________
+##
+##LIBRARIES
+##
+
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+##___________________________
+##
+##FILES & FOLDERS
+##
+
+include_directories(include)
+#include_directories(ext)
+
+
+##DIR
+SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/dll)
+SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+
+file(GLOB FRAMESIMSOURCES
+		src/framesimulator/*.cc
+)
+
+file(GLOB SFMSIMULATORSOURCES
+		src/sfmsimulator/*.cc
+)
+
+file(GLOB VISUALIZERSOURCES
+		src/visualizer/*.cc
+)
+
+file(GLOB POINTCLASSIFIERSOURCES
+		src/pointclassifier/*.cc
+)
+
+file(GLOB MAINSOURCES
+  src/main.cc
+)
+
+file (GLOB TESTSOURCES
+    tests/test_main.cc
+)
+
+
+##___________________________
+##
+##LIBRARIES & EXECUTABLES
+##
+
+add_library(pointclassifier ${POINTCLASSIFIERSOURCES})
+add_library(visualizer ${VISUALIZERSOURCES})
+add_library(sfmsimulator ${SFMSIMULATORSOURCES})
+add_library(framesim ${FRAMESIMSOURCES})
+
+#target_link_libraries(solver bench octree)
+
+add_executable (${PROJECT_NAME}  ${MAINSOURCES})
+
+target_link_libraries(${PROJECT_NAME} pointclassifier visualizer sfmsimulator framesim)
+
+
+add_executable (runtests ${TESTSOURCES})
+target_link_libraries(runtests ${GTEST_LIBRARIES} pthread)

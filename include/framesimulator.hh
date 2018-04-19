@@ -13,6 +13,10 @@
 namespace sfmsimulator::framesimulator {
 class Framesimulator {
  public:
+  Framesimulator(const std::vector<std::string> filepaths,
+                 const cameramodel::Cameramodel cameramodel)
+      : Framesimulator(filepaths[0], filepaths[1], filepaths[2], cameramodel) {}
+
   Framesimulator(const std::string file_camera_poses,
                  const std::string file_3d_static_landmarks,
                  const std::string file_3d_dynamic_landmarks,
@@ -59,7 +63,7 @@ class Framesimulator {
 
       // start after dynamic points
       size_t global_landmark_index(std::get<1>(_header_3d_dynamic_landmarks));
-      // read all landmarks
+      // read all static landmarks
       for (size_t landmark_i(0); landmark_i < _header_3d_static_landmarks;
            landmark_i++) {
         fstream_3d_static_landmarks >>

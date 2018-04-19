@@ -18,10 +18,17 @@ struct Sfmconfig {
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
   std::vector<std::string> filepaths;
+
+  cameramodel::Cameramodel cameramodel;
 };
 
 class Sfmsimulator {
  public:
+  Sfmsimulator(Sfmconfig config)
+      : _config(config),
+        _cameramodel(config.cameramodel),
+        _framesimulator(framesimulator::Framesimulator(config.filepaths,
+                                                       config.cameramodel)) {}
   // TODO(dave): write run
   void run();
 
@@ -30,6 +37,7 @@ class Sfmsimulator {
   void reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                    std::shared_ptr<points::Points2d> points_frame2);
 
+  const Sfmconfig _config;
   const framesimulator::Framesimulator _framesimulator;
   const cameramodel::Cameramodel _cameramodel;
 

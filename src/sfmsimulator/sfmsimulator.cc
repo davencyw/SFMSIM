@@ -40,6 +40,7 @@ void Sfmsimulator::reconstruct(
 
   std::vector<cv::Mat> Rs_est, ts_est, points3d_estimated;
   bool is_projective(true);
+  // TODO(dave): install opencv::sfm
   // cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est,
   // points3points3d_estimated, is_projective);
 }

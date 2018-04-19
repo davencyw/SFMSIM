@@ -86,6 +86,7 @@ class Framesimulator {
 
   // projects current landmarks onto image plan of camerapose
   points::Points2d step_GetImagePoints();
+  const size_t updatesLeft() const { return _header_camera_poses - _steps - 1; }
 
  private:
   // returns all 3d landmarks in the scene at the current step
@@ -106,6 +107,8 @@ class Framesimulator {
   size_t _header_3d_static_landmarks;
   // number of frames, number of landmarks
   std::tuple<size_t, size_t> _header_3d_dynamic_landmarks;
+  // number of executed steps / updates
+  size_t _steps = 0;
 
   // position data
   array_t _xposition_3d_static_landmarks;

@@ -37,7 +37,7 @@ SET (RELEASE_FLAGS "-O3 -march=native  -mtune=native -mavx2 -mavx -msse -ftree-v
 
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
 
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -lboost_program_options -lboost_filesystem -lboost_system ")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -lboost_program_options -lboost_filesystem -lboost_system -lopencv_core -lopencv_imgproc -lopencv_highgui")
 ## -fopt-info-vec-optimized
 
 ##___________________________

@@ -6,6 +6,20 @@
 #include <cassert>
 
 namespace sfmsimulator {
+void Sfmsimulator::run() {
+  const size_t steps(_framesimulator.updatesLeft());
+  doSteps(steps);
+}
+
+void Sfmsimulator::doSteps(const size_t steps) {
+  for (size_t step_i(0); step_i < steps; step_i++) {
+    step();
+  }
+}
+
+void Sfmsimulator::step() {
+  // TODO(dave): implement: reconstruct - classify - reconstruct
+}
 
 // TODO(dave): figure out return type and what to return.
 void Sfmsimulator::reconstruct(

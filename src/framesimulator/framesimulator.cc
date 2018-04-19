@@ -19,11 +19,12 @@ void Framesimulator::update3dScenePoints() {
         (*yposition_3d_all)(dynamic_point_i) >>
         (*zposition_3d_all)(dynamic_point_i);
   }
+
+  ++_steps;
 }
 
 points::Points2d Framesimulator::step_GetImagePoints() {
   // project all landmarks at current 3d poses onto imageplane
-
   update3dScenePoints();
 }
 

@@ -26,6 +26,11 @@ struct Sfmconfig {
   std::vector<std::string> filepaths;
 };
 
+struct Sfmreconstruction {
+  std::shared_ptr<mat44_t> transformation;
+  std::shared_ptr<points::Points3d> point3d_estimate;
+};
+
 class Sfmsimulator {
 public:
   Sfmsimulator(Sfmconfig config);
@@ -41,8 +46,9 @@ public:
 
 private:
   // calls opencv::sfm::reconstruct to estimate camera odometry and 3d landmarks
-  void reconstruct(std::shared_ptr<points::Points2d> points_frame1,
-                   std::shared_ptr<points::Points2d> points_frame2);
+  Sfmreconstruction
+  reconstruct(std::shared_ptr<points::Points2d> points_frame1,
+              std::shared_ptr<points::Points2d> points_frame2);
 
   // model configuration
   const Sfmconfig _config;
@@ -52,7 +58,10 @@ private:
   const cv::Matx33d _K;
 
   // scene window
-  std::deque<std::shared_ptr<points::Points2d>> _scene_window;
+  std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;
+  std::deque<std::shared_ptr<points::Points3d>> _scene_window_world;
+  std::deque<std::shared_ptr<mat44_t>> _scene_camera_transforms;
+  mat44_t _scene_camera_pose;
 
   // simulation variables
   size_t _step = 0;

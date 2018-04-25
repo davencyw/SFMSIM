@@ -29,7 +29,6 @@ const std::vector<bool> PC_Triangulationerror::classify(
   array_t total_reprojection_error(reprojection_error[0] +
                                    reprojection_error[1]);
 
-  // TODO(dave): reprojection error:
   // TODO(dave): classification rule
 }
 

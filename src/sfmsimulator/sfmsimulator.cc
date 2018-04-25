@@ -43,16 +43,17 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       << " \n"
       << "    |___/ |_| |_| |_| |_|  \\__,_| |_|  \\__,_|  \\__|  \\___/  "
       << "|_| \n\n\n\n"
-      << "author: david schmidig [david@davencyw.net]\n"
-      << "        davencyw code  [davencyw.net]\n"
-      << "        ETH Zurich\n\n"
-      << "_____________________________________________________\n\n\n";
-  ;
+      << "    author: david schmidig [david@davencyw.net]\n"
+      << "            davencyw code  [davencyw.net]\n"
+      << "            ETH Zurich\n\n"
+      << "_____________________________________________________________________"
+         "\n\n\n";
+
+  _scene_camera_pose.setIdentity();
 }
 
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
-  // TODO(dave): check initial step, which does not need an update
   doSteps(steps);
 }
 
@@ -63,35 +64,56 @@ void Sfmsimulator::doSteps(const size_t steps) {
 }
 
 // TODO(dave) add generic depending sliding window to pc_classifier
+// TODO(dave) separate initializationsteps (_steps=0,1) from this method
 void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
-  // TODO(dave): change from deque to something more efficient regarding
-  // reallocation and pointers
-  _scene_window.push_front(std::make_shared<points::Points2d>(
+  _scene_window_image.push_front(std::make_shared<points::Points2d>(
       _framesimulator.step_GetImagePoints()));
 
   // initialization step
-  if (_scene_window.size() < 2) {
+  if (_scene_window_image.size() < 2) {
     assert(_step == 0);
+    ++_step;
     return;
   }
 
-  // TODO(dave): implement: reconstruct - classify - reconstruct
-  assert(_scene_window.size() == 2);
+  assert(_scene_window_world.size() == 2);
   // newer frame is older (frame2.time > frame1.time) but is placed in the front
   // of the deque!
-  reconstruct(_scene_window[1], _scene_window[0]);
+  std::shared_ptr<points::Points3d> points_world2;
+  Sfmreconstruction reconstruction(
+      reconstruct(_scene_window_image[1], _scene_window_image[0]));
+  _scene_window_world.push_front(reconstruction.point3d_estimate);
 
-  _scene_window.pop_back();
+  _scene_camera_pose = _scene_camera_pose * (*reconstruction.transformation);
+  _scene_camera_transforms.push_front(reconstruction.transformation);
+
+  // needs two 3d pointestimate for initialization
+  if (_scene_window_world.size() < 2) {
+    assert(_step == 1);
+    ++_step;
+    return;
+  }
+
+  if (_pointclassifier) {
+    // classify and reconstruct with only static points
+    _pointclassifier->classify(_scene_window_image[1], _scene_window_image[0],
+                               _scene_window_world[1], _scene_window_world[0]);
+  }
+
+  // TODO(dave): reconstruct again with classified features!
+
+  _scene_window_world.pop_back();
+  _scene_window_image.pop_back();
   ++_step;
 }
 
-// TODO(dave): figure out return type and what to return.
-void Sfmsimulator::reconstruct(
-    std::shared_ptr<points::Points2d> points_frame1,
-    std::shared_ptr<points::Points2d> points_frame2) {
+Sfmreconstruction
+Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
+                          std::shared_ptr<points::Points2d> points_frame2) {
   std::vector<cv::Mat> points_collapsed;
+  Sfmreconstruction reconstruction;
 
   // cast SOA-pointdata to the reconstruct sfm api of opencv
   const size_t num_points_frame1(points_frame1->coord[0].size());
@@ -120,6 +142,9 @@ void Sfmsimulator::reconstruct(
   bool is_projective(true);
   cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est, _K, points3d_estimated,
                        is_projective);
+
+  reconstruction.transformation;
+  reconstruction.point3point3d_estimate;
 }
 
 } // namespace sfmsimulator

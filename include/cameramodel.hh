@@ -16,12 +16,10 @@ struct Imageplane {
 };
 
 class Cameramodel {
- public:
+public:
   Cameramodel(const precision_t f, const precision_t cx, const precision_t cy,
               const size_t image_width, const size_t image_height)
-      : _f(f),
-        _cx(cx),
-        _cy(cy),
+      : _f(f), _cx(cx), _cy(cy),
         _imageplane(Imageplane(image_width, image_height)) {}
 
   const inline cv::Matx33d getK() const {
@@ -30,7 +28,7 @@ class Cameramodel {
 
   const Imageplane getImageplane() const { return _imageplane; }
 
- private:
+private:
   const precision_t _f;
   const precision_t _cx;
   const precision_t _cy;
@@ -38,6 +36,6 @@ class Cameramodel {
   const Imageplane _imageplane;
 };
 
-}  // namespace sfmsimulator::cameramodel
+} // namespace sfmsimulator::cameramodel
 
 #endif /* end of include guard: __CAMERAMODEL_HH__ */

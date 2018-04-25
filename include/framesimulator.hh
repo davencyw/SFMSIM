@@ -12,7 +12,7 @@
 
 namespace sfmsimulator::framesimulator {
 class Framesimulator {
- public:
+public:
   Framesimulator(const std::vector<std::string> filepaths,
                  const cameramodel::Cameramodel cameramodel)
       : Framesimulator(filepaths[0], filepaths[1], filepaths[2], cameramodel) {}
@@ -33,12 +33,12 @@ class Framesimulator {
     return _header_camera_poses - _steps;
   }
 
- private:
+private:
   // updates all 3d landmarks in the scene at the current step
   void update3dScenePoints();
 
   // update camerapose to current pose
-  void updateCameraPose();
+  mat44_t updateCameraPose();
 
   // filepaths
   const std::string _file_camera_poses;
@@ -62,8 +62,9 @@ class Framesimulator {
   points::Points3d _scene_3d_points;
 
   const cameramodel::Imageplane _imageplane;
-  const cv::Matx33d _K;
+  const cv::Matx33d _K_ocv;
+  const mat33_t _K_eigen;
 };
-}  // namespace sfmsimulator::framesimulator
+} // namespace sfmsimulator::framesimulator
 
 #endif /* end of include guard: __FRAMESIMULATOR_HH__ */

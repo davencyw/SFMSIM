@@ -7,6 +7,7 @@
 #include "pointclassifier.hh"
 #include "points.hh"
 
+#include <deque>
 #include <iostream>
 #include <memory>
 
@@ -17,13 +18,12 @@ struct Sfmconfig {
   Sfmconfig(cameramodel::Cameramodel camera) : cameramodel(camera) {}
 
   pointclassifier::Pointclassifier_type type_pointclassifier;
+  cameramodel::Cameramodel cameramodel;
 
   // 0 camera_poses
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
   std::vector<std::string> filepaths;
-
-  cameramodel::Cameramodel cameramodel;
 };
 
 class Sfmsimulator {
@@ -44,11 +44,15 @@ private:
   void reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                    std::shared_ptr<points::Points2d> points_frame2);
 
+  // model configuration
   const Sfmconfig _config;
   framesimulator::Framesimulator _framesimulator;
-  const cameramodel::Cameramodel _cameramodel;
-
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;
+  const cameramodel::Cameramodel _cameramodel;
+  const cv::Matx33d _K;
+
+  // scene window
+  std::deque<std::shared_ptr<points::Points2d>> _scene_window;
 
   // simulation variables
   size_t _step = 0;

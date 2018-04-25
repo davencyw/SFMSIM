@@ -16,7 +16,7 @@ const std::vector<bool> PC_Triangulationerror::classify(
   const std::array<array_t, 2> *const image_coord_frame_2(
       &(image_points_frame_2->coord));
 
-  // TODO(dave): reproject
+  // TODO(dave): transform and reproject
   std::array<array_t, 2> image_coord_frame_2_projected_from_1;
   std::array<array_t, 2> reprojection_error;
 

@@ -13,6 +13,7 @@ namespace sfmsimulator {
 
 Sfmsimulator::Sfmsimulator(Sfmconfig config)
     : _config(config), _cameramodel(config.cameramodel),
+      _K(config.cameramodel.getK_ocv()),
       _framesimulator(framesimulator::Framesimulator(config.filepaths,
                                                      config.cameramodel)) {
   using pct = pointclassifier::Pointclassifier_type;
@@ -61,16 +62,28 @@ void Sfmsimulator::doSteps(const size_t steps) {
   }
 }
 
+// TODO(dave) add generic depending sliding window to pc_classifier
 void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
-  const points::Points2d image_points = _framesimulator.step_GetImagePoints();
-  //*DEBUG*/ std::cout << image_points.coord[0];
-  //*DEBUG*/ std::cout << "\n";
-  //*DEBUG*/ std::cout << image_points.coord[1];
+  // TODO(dave): change from deque to something more efficient regarding
+  // reallocation and pointers
+  _scene_window.push_front(std::make_shared<points::Points2d>(
+      _framesimulator.step_GetImagePoints()));
+
+  // initialization step
+  if (_scene_window.size() < 2) {
+    assert(_step == 0);
+    return;
+  }
 
   // TODO(dave): implement: reconstruct - classify - reconstruct
+  assert(_scene_window.size() == 2);
+  // newer frame is older (frame2.time > frame1.time) but is placed in the front
+  // of the deque!
+  reconstruct(_scene_window[1], _scene_window[0]);
 
+  _scene_window.pop_back();
   ++_step;
 }
 
@@ -103,11 +116,9 @@ void Sfmsimulator::reconstruct(
   points_collapsed.push_back(frame1);
   points_collapsed.push_back(frame2);
 
-  cv::Matx33d K = _cameramodel.getK_ocv();
-
   std::vector<cv::Mat> Rs_est, ts_est, points3d_estimated;
   bool is_projective(true);
-  cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est, points3d_estimated,
+  cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est, _K, points3d_estimated,
                        is_projective);
 }
 

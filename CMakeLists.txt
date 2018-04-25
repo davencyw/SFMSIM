@@ -51,6 +51,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 enable_testing()
 
 find_package( OpenCV REQUIRED )
+find_library( OpenCV_SFM libopencv_sfm.so REQUIRED)
 
 ##___________________________
 ##
@@ -102,11 +103,10 @@ add_library(framesim ${FRAMESIMSOURCES})
 
 target_link_libraries(pointclassifier ${OpenCV_LIBS})
 target_link_libraries(visualizer ${OpenCV_LIBS})
-target_link_libraries(sfmsimulator ${OpenCV_LIBS})
+target_link_libraries(sfmsimulator ${OpenCV_LIBS} ${OpenCV_SFM} )
 target_link_libraries(framesim ${OpenCV_LIBS})
 
 add_executable (${PROJECT_NAME}  ${MAINSOURCES})
-
 target_link_libraries(${PROJECT_NAME} pointclassifier visualizer sfmsimulator framesim)
 
 add_executable (runtests ${TESTSOURCES})

@@ -52,10 +52,10 @@ private:
 
   // model configuration
   const Sfmconfig _config;
-  framesimulator::Framesimulator _framesimulator;
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;
   const cameramodel::Cameramodel _cameramodel;
   const cv::Matx33d _K;
+  framesimulator::Framesimulator _framesimulator;
 
   // scene window
   std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;

@@ -13,25 +13,25 @@ enum Pointclassifier_type { PC_Triangulationerror_t };
 
 // TODO(dave): create class for clustering!
 class Pointclassifier {
- public:
+public:
   Pointclassifier(cameramodel::Cameramodel cameramodel)
-      : _cameramodel(cameramodel){};
+      : _cameramodel(cameramodel) {}
 
   // classifies points into static and dynamic points
-  virtual const std::vector<bool> classify(
+  virtual const array_t classifynext(
       const std::shared_ptr<points::Points2d> image_points_frame_1,
       const std::shared_ptr<points::Points2d> image_points_frame_2,
       const std::shared_ptr<points::Points3d> world_points_frame_1,
-      const std::shared_ptr<points::Points3d> world_points_frame_2) const {}
+      const std::shared_ptr<points::Points3d> world_points_frame_2) const = 0;
 
   // clusters dynamic points specified in type and creates convex hull
   virtual void cluster(const points::Points2d image_points,
-                       const std::vector<bool> type) const {}
+                       const std::vector<bool> type) const = 0;
 
- private:
+protected:
   const cameramodel::Cameramodel _cameramodel;
 };
 
-}  // namespace sfmsimulator::pointclassifier
+} // namespace sfmsimulator::pointclassifier
 
 #endif /* end of include guard: __POINTCLASSIFIER_HH__ */

@@ -110,6 +110,7 @@ mat44_t Framesimulator::updateCameraPose() {
   mat44_t transformation = mat44_t::Zero();
   transformation.block<3, 3>(0, 0) = rotation;
   transformation.col(3) = translation;
+
   return transformation;
 }
 
@@ -136,9 +137,8 @@ points::Points2d Framesimulator::step_GetImagePoints() {
     point_vec4(2) = _scene_3d_points.coord[2](point_i);
 
     // project onto camera
-    const vec4_t lm = camera_to_world * point_vec4;
-    const Eigen::Map<vec3_t> point_vec3(point_vec4.data(), 3);
-    const vec3_t pt_h = _K_eigen * point_vec3;
+    vec4_t lm = camera_to_world * point_vec4;
+    const vec3_t pt_h = _K_eigen * Eigen::Map<vec3_t>(lm.data(), 3);
 
     // get image coordinates and write
     const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
@@ -155,6 +155,7 @@ points::Points2d Framesimulator::step_GetImagePoints() {
       projected.coord[1](point_i) = y_image_coord_local;
     }
   }
+
   return projected;
 }
 

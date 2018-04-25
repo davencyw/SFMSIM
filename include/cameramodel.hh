@@ -17,6 +17,8 @@ struct Imageplane {
 
 class Cameramodel {
 public:
+  Cameramodel()
+      : _f(50), _cx(400), _cy(300), _imageplane(Imageplane(800, 600)) {}
   Cameramodel(const precision_t f, const precision_t cx, const precision_t cy,
               const size_t image_width, const size_t image_height)
       : _f(f), _cx(cx), _cy(cy),

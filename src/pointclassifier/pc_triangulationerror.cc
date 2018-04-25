@@ -2,16 +2,16 @@
 
 namespace sfmsimulator::pointclassifier {
 
-const std::vector<bool> PC_Triangulationerror::classify(
+const array_t PC_Triangulationerror::classifynext(
     const std::shared_ptr<points::Points2d> image_points_frame_1,
     const std::shared_ptr<points::Points2d> image_points_frame_2,
     const std::shared_ptr<points::Points3d> world_points_frame_1,
     const std::shared_ptr<points::Points3d> world_points_frame_2) const {
   size_t numpoints(image_points_frame_1->coord[0].size());
-  std::vector<bool> types(numpoints);
+  array_t types(array_t::Ones(numpoints));
 
-  const std::array<array_t, 3> *const world_coord_frame_1(
-      &(world_points_frame_1->coord));
+  // const std::array<array_t, 3> *const world_coord_frame_1(
+  //     &(world_points_frame_1->coord));
   //
   const std::array<array_t, 2> *const image_coord_frame_2(
       &(image_points_frame_2->coord));
@@ -19,6 +19,8 @@ const std::vector<bool> PC_Triangulationerror::classify(
   // TODO(dave): transform and reproject
   std::array<array_t, 2> image_coord_frame_2_projected_from_1;
   std::array<array_t, 2> reprojection_error;
+
+  // TRANSFORM HERE !(easy)REPROJECT HERE !(little more complicated...)
 
   reprojection_error[0] =
       ((*image_coord_frame_2)[0] - image_coord_frame_2_projected_from_1[0])
@@ -30,6 +32,7 @@ const std::vector<bool> PC_Triangulationerror::classify(
                                    reprojection_error[1]);
 
   // TODO(dave): classification rule
+  return types;
 }
 
 void PC_Triangulationerror::cluster(const points::Points2d image_points,

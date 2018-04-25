@@ -15,7 +15,7 @@ if (NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "RELEASE" FORCE)
 endif ()
 
-SET (CMAKE_BUILD_TYPE "RELEASE")
+SET (CMAKE_BUILD_TYPE "DEBUG")
 
 message("mode")
 message("${CMAKE_BUILD_TYPE}")
@@ -34,11 +34,11 @@ message("___________________")
 ##
 
 SET (RELEASE_FLAGS "-O3 -march=native  -mtune=native -mavx2 -mavx -msse -ftree-vectorize")
+## -fopt-info-vec-optimized
 
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g")
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -lboost_program_options -lboost_filesystem -lboost_system -lopencv_core -lopencv_imgproc -lopencv_highgui")
-## -fopt-info-vec-optimized
 
 ##___________________________
 ##
@@ -103,7 +103,7 @@ add_library(framesim ${FRAMESIMSOURCES})
 
 target_link_libraries(pointclassifier ${OpenCV_LIBS})
 target_link_libraries(visualizer ${OpenCV_LIBS})
-target_link_libraries(sfmsimulator ${OpenCV_LIBS} ${OpenCV_SFM} )
+target_link_libraries(sfmsimulator ${OpenCV_LIBS} ${OpenCV_SFM} pointclassifier)
 target_link_libraries(framesim ${OpenCV_LIBS})
 
 add_executable (${PROJECT_NAME}  ${MAINSOURCES})

@@ -4,7 +4,9 @@
 #define CERES_FOUND 1
 #define CV_OVERRIDE override
 
+#include <opencv2/core/affine.hpp>
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/sfm.hpp>
 
 #include <cassert>
@@ -20,7 +22,7 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
 
   switch (config.type_pointclassifier) {
   case pct::PC_Triangulationerror_t:
-    _pointclassifier = std::make_unique<pointclassifier::Pointclassifier>(
+    _pointclassifier = std::make_unique<pointclassifier::PC_Triangulationerror>(
         pointclassifier::PC_Triangulationerror(_cameramodel));
     break;
   default:
@@ -54,6 +56,7 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
 
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
+  std::cout << "STEPS: " << steps << "\n\n\n";
   doSteps(steps);
 }
 
@@ -78,10 +81,11 @@ void Sfmsimulator::step() {
     return;
   }
 
-  assert(_scene_window_world.size() == 2);
+  assert(_scene_window_image.size() == 2);
   // newer frame is older (frame2.time > frame1.time) but is placed in the front
   // of the deque!
   std::shared_ptr<points::Points3d> points_world2;
+  std::cout << " -    reconstruction \n";
   Sfmreconstruction reconstruction(
       reconstruct(_scene_window_image[1], _scene_window_image[0]));
   _scene_window_world.push_front(reconstruction.point3d_estimate);
@@ -98,13 +102,13 @@ void Sfmsimulator::step() {
 
   if (_pointclassifier) {
     // classify and reconstruct with only static points
-    _pointclassifier->classify(_scene_window_image[1], _scene_window_image[0],
-                               _scene_window_world[1], _scene_window_world[0]);
+    _pointclassifier->classifynext(
+        _scene_window_image[1], _scene_window_image[0], _scene_window_world[1],
+        _scene_window_world[0]);
+    std::cout << " -    classify \n";
   }
 
-  // TODO(dave): reconstruct again with classified features!
-
-  _scene_window_world.pop_back();
+  //   _scene_window_world.pop_back();
   _scene_window_image.pop_back();
   ++_step;
 }
@@ -138,13 +142,32 @@ Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
   points_collapsed.push_back(frame1);
   points_collapsed.push_back(frame2);
 
-  std::vector<cv::Mat> Rs_est, ts_est, points3d_estimated;
+  std::vector<cv::Mat> rotation_estimate, translation_estimate,
+      points3d_estimated;
   bool is_projective(true);
-  cv::sfm::reconstruct(points_collapsed, Rs_est, ts_est, _K, points3d_estimated,
+  cv::sfm::reconstruct(points_collapsed, rotation_estimate,
+                       translation_estimate, _K, points3d_estimated,
                        is_projective);
 
-  reconstruction.transformation;
-  reconstruction.point3d_estimate;
+  // TODO(dave): this could probably done easier!!
+  mat44_t transform_eigen(mat44_t::Zero());
+  mat33_t rotation_eigen;
+  vec4_t translation_eigen(vec4_t::Ones());
+  cv::cv2eigen(rotation_estimate[0], rotation_eigen);
+  // cv::cv2eigen(translation_estimate[0], translation_eigen);
+
+  //  std::cout << rotation_estimate[0];
+
+  transform_eigen.block<3, 3>(0, 0) = rotation_eigen;
+  transform_eigen.block<4, 1>(0, 3) = translation_eigen;
+  //
+  reconstruction.transformation = std::make_shared<mat44_t>(transform_eigen);
+  //
+  // std::cout << points3d_estimated[0];
+  //
+  // reconstruction.point3d_estimate;
+
+  return reconstruction;
 }
 
 } // namespace sfmsimulator

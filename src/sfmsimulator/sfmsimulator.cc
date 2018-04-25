@@ -154,17 +154,12 @@ Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
   mat33_t rotation_eigen;
   vec4_t translation_eigen(vec4_t::Ones());
   cv::cv2eigen(rotation_estimate[0], rotation_eigen);
-  // cv::cv2eigen(translation_estimate[0], translation_eigen);
-
-  //  std::cout << rotation_estimate[0];
+  cv::cv2eigen(translation_estimate[0], translation_eigen);
 
   transform_eigen.block<3, 3>(0, 0) = rotation_eigen;
   transform_eigen.block<4, 1>(0, 3) = translation_eigen;
   //
   reconstruction.transformation = std::make_shared<mat44_t>(transform_eigen);
-  //
-  // std::cout << points3d_estimated[0];
-  //
   // reconstruction.point3d_estimate;
 
   return reconstruction;

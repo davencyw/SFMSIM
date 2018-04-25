@@ -20,8 +20,6 @@ const array_t PC_Triangulationerror::classifynext(
   std::array<array_t, 2> image_coord_frame_2_projected_from_1;
   std::array<array_t, 2> reprojection_error;
 
-  // TRANSFORM HERE !(easy)REPROJECT HERE !(little more complicated...)
-
   reprojection_error[0] =
       ((*image_coord_frame_2)[0] - image_coord_frame_2_projected_from_1[0])
           .square();

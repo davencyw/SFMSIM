@@ -144,7 +144,7 @@ Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                        is_projective);
 
   reconstruction.transformation;
-  reconstruction.point3point3d_estimate;
+  reconstruction.point3d_estimate;
 }
 
 } // namespace sfmsimulator

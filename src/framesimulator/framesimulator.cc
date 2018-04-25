@@ -126,8 +126,6 @@ points::Points2d Framesimulator::step_GetImagePoints() {
 
   const size_t numpoints(_scene_3d_points.numpoints);
   points::Points2d projected(numpoints);
-  array_t *x_image_coord(&projected.coord[0]);
-  array_t *y_image_coord(&projected.coord[1]);
 
   // TODO(dave) rewrite matrix-vector^n computation efficiently without creating
   // vectors!
@@ -146,20 +144,17 @@ points::Points2d Framesimulator::step_GetImagePoints() {
     const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
     const precision_t y_image_coord_local = pt_h(1) / pt_h(2);
 
-    // TODO(handle unobservable point ids!)
+    // TODO(dave)handle unobservable point ids!
     // TODO(dave): check if  observable
     // TODO(dave): do this polygon check outside of the loop for efficiency
+    // TODO(dave): work with projected.coord pointer instead of bracket ops
     bool is_in_image(geometry::isInside2dPolygon(
         x_image_coord_local, y_image_coord_local, image_height, image_width));
     if (is_in_image) {
-      *x_image_coord = x_image_coord_local;
-      *y_image_coord = y_image_coord_local;
+      projected.coord[0](point_i) = x_image_coord_local;
+      projected.coord[1](point_i) = y_image_coord_local;
     }
-
-    ++x_image_coord;
-    ++y_image_coord;
   }
-
   return projected;
 }
 

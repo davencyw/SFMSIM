@@ -24,6 +24,7 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   }
 
   std::cout
+      << "\033[0m\n"
       << "\n\n\n\n"
       << "            __\n"
       << "     ___   / _|  _ __ ___      \n"
@@ -37,11 +38,17 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       << "    \\__ \\ | | | | | | | | | |_| | | | | (_| | | |_  | (_) | | |  "
       << " \n"
       << "    |___/ |_| |_| |_| |_|  \\__,_| |_|  \\__,_|  \\__|  \\___/  "
-      << "|_| \n\n\n\n\n\n\n";
+      << "|_| \n\n\n\n"
+      << "author: david schmidig [david@davencyw.net]\n"
+      << "        davencyw code  [davencyw.net]\n"
+      << "        ETH Zurich\n\n"
+      << "_____________________________________________________\n\n\n";
+  ;
 }
 
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
+  std::cout << "DO N# " << steps << " STEPS: \n";
   // TODO(dave): check initial step, which does not need an update
   doSteps(steps);
 }
@@ -56,6 +63,9 @@ void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
   const points::Points2d image_points = _framesimulator.step_GetImagePoints();
+  /*DEBUG*/ std::cout << image_points.coord[0];
+  /*DEBUG*/ std::cout << "\n";
+  /*DEBUG*/ std::cout << image_points.coord[1];
 
   // TODO(dave): implement: reconstruct - classify - reconstruct
 

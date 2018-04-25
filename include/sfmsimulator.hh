@@ -27,8 +27,9 @@ struct Sfmconfig {
 };
 
 class Sfmsimulator {
- public:
+public:
   Sfmsimulator(Sfmconfig config);
+  Sfmsimulator(std::string config_file_path);
 
   // TODO(dave): write run
   void run();
@@ -39,7 +40,7 @@ class Sfmsimulator {
 
   ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
 
- private:
+private:
   // calls opencv::sfm::reconstruct to estimate camera odometry and 3d landmarks
   void reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                    std::shared_ptr<points::Points2d> points_frame2);
@@ -54,6 +55,6 @@ class Sfmsimulator {
   size_t _step = 0;
   bool _visualize = 0;
 };
-}  // namespace sfmsimulator
+} // namespace sfmsimulator
 
 #endif /* end of include guard: __SFMSIMULATOR_HH__ */

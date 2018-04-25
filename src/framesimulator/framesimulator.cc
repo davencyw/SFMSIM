@@ -1,6 +1,7 @@
 #include "framesimulator.hh"
 
 #include "cameramodel.hh"
+#include "geometry.hh"
 
 #include <opencv2/core/eigen.hpp>
 
@@ -117,11 +118,13 @@ points::Points2d Framesimulator::step_GetImagePoints() {
   update3dScenePoints();
 
   // next poses of camera
-  mat44_t world_to_camera(updateCameraPose());
-  mat44_t camera_to_world(world_to_camera.inverse());
+  const mat44_t world_to_camera(updateCameraPose());
+  const mat44_t camera_to_world(world_to_camera.inverse());
 
-  // TODO(handle unobservable point ids!)
-  size_t numpoints(_scene_3d_points.numpoints);
+  const size_t image_width(_imageplane.width);
+  const size_t image_height(_imageplane.height);
+
+  const size_t numpoints(_scene_3d_points.numpoints);
   points::Points2d projected(numpoints);
   array_t *x_image_coord(&projected.coord[0]);
   array_t *y_image_coord(&projected.coord[1]);
@@ -136,17 +139,27 @@ points::Points2d Framesimulator::step_GetImagePoints() {
 
     // project onto camera
     const vec4_t lm = camera_to_world * point_vec4;
-    Eigen::Map<vec3_t> point_vec3(point_vec4.data(), 3);
+    const Eigen::Map<vec3_t> point_vec3(point_vec4.data(), 3);
     const vec3_t pt_h = _K_eigen * point_vec3;
 
     // get image coordinates and write
     const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
     const precision_t y_image_coord_local = pt_h(1) / pt_h(2);
 
-    // TODO(dave): check if within imageplane
+    // TODO(handle unobservable point ids!)
+    // TODO(dave): check if  observable
+    // TODO(dave): do this polygon check outside of the loop for efficiency
+    bool is_in_image(geometry::isInside2dPolygon(
+        x_image_coord_local, y_image_coord_local, image_height, image_width));
+    if (is_in_image) {
+      *x_image_coord = x_image_coord_local;
+      *y_image_coord = y_image_coord_local;
+    }
+
+    ++x_image_coord;
+    ++y_image_coord;
   }
 
-  // TODO(dave): write projected points efficiently
   return projected;
 }
 

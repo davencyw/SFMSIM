@@ -48,7 +48,6 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
 
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
-  std::cout << "DO N# " << steps << " STEPS: \n";
   // TODO(dave): check initial step, which does not need an update
   doSteps(steps);
 }
@@ -63,9 +62,9 @@ void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
   const points::Points2d image_points = _framesimulator.step_GetImagePoints();
-  /*DEBUG*/ std::cout << image_points.coord[0];
-  /*DEBUG*/ std::cout << "\n";
-  /*DEBUG*/ std::cout << image_points.coord[1];
+  //*DEBUG*/ std::cout << image_points.coord[0];
+  //*DEBUG*/ std::cout << "\n";
+  //*DEBUG*/ std::cout << image_points.coord[1];
 
   // TODO(dave): implement: reconstruct - classify - reconstruct
 

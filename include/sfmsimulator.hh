@@ -31,7 +31,6 @@ public:
   Sfmsimulator(Sfmconfig config);
   Sfmsimulator(std::string config_file_path);
 
-  // TODO(dave): write run
   void run();
   void doSteps(const size_t steps);
   void step();

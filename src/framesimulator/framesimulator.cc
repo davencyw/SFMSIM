@@ -13,7 +13,8 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     : _file_camera_poses(file_camera_poses),
       _file_3d_static_landmarks(file_3d_static_landmarks),
       _file_3d_dynamic_landmarks(file_3d_dynamic_landmarks),
-      _imageplane(cameramodel.getImageplane()), _K_ocv(cameramodel.getK()) {
+      _imageplane(cameramodel.getImageplane()), _K_ocv(cameramodel.getK_ocv()),
+      _K_eigen(cameramodel.getK_eigen()) {
   _fstream_camera_poses = std::make_unique<std::ifstream>();
   _fstream_3d_dynamic_landmarks = std::make_unique<std::ifstream>();
 
@@ -66,10 +67,6 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
   };
   fstream_3d_static_landmarks.close();
-
-  // TODO(dave): check if ocv _K is even used!
-  // generate map for opencv _K to eigen _K
-  // cv::cv2eigen(_K_ocv, _K_eigen);
 };
 
 void Framesimulator::update3dScenePoints() {
@@ -143,8 +140,8 @@ points::Points2d Framesimulator::step_GetImagePoints() {
     const vec3_t pt_h = _K_eigen * point_vec3;
 
     // get image coordinates and write
-    const x_image_coord_local = pt_h(0) / pt_h(2);
-    const y_image_coord_local = pt_h(1) / pt_h(2);
+    const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
+    const precision_t y_image_coord_local = pt_h(1) / pt_h(2);
 
     // TODO(dave): check if within imageplane
   }

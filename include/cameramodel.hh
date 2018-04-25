@@ -22,8 +22,14 @@ public:
       : _f(f), _cx(cx), _cy(cy),
         _imageplane(Imageplane(image_width, image_height)) {}
 
-  const inline cv::Matx33d getK() const {
+  const inline cv::Matx33d getK_ocv() const {
     return cv::Matx33d(_f, 0, _cx, 0, _f, _cy, 0, 0, 1);
+  }
+
+  const inline mat33_t getK_eigen() const {
+    mat33_t K;
+    K << _f, 0, _cx, 0, _f, _cy, 0, 0, 1;
+    return K;
   }
 
   const Imageplane getImageplane() const { return _imageplane; }

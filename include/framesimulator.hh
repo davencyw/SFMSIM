@@ -62,6 +62,7 @@ private:
   points::Points3d _scene_3d_points;
 
   const cameramodel::Imageplane _imageplane;
+  // TODO(dave): check if ocv _K is even used!
   const cv::Matx33d _K_ocv;
   const mat33_t _K_eigen;
 };

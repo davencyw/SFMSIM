@@ -1,5 +1,5 @@
-#include "sfmsimulator.hh"
 #include "pc_triangulationerror.hh"
+#include "sfmsimulator.hh"
 
 #include <opencv2/core/core.hpp>
 //#include <opencv2/sfm.hpp>
@@ -9,19 +9,18 @@
 namespace sfmsimulator {
 
 Sfmsimulator::Sfmsimulator(Sfmconfig config)
-    : _config(config),
-      _cameramodel(config.cameramodel),
+    : _config(config), _cameramodel(config.cameramodel),
       _framesimulator(framesimulator::Framesimulator(config.filepaths,
                                                      config.cameramodel)) {
   using pct = pointclassifier::Pointclassifier_type;
 
   switch (config.type_pointclassifier) {
-    case pct::PC_Triangulationerror_t:
-      _pointclassifier = std::make_unique<pointclassifier::Pointclassifier>(
-          pointclassifier::PC_Triangulationerror(_cameramodel));
-      break;
-    default:
-      break;
+  case pct::PC_Triangulationerror_t:
+    _pointclassifier = std::make_unique<pointclassifier::Pointclassifier>(
+        pointclassifier::PC_Triangulationerror(_cameramodel));
+    break;
+  default:
+    break;
   }
 
   std::cout
@@ -77,10 +76,10 @@ void Sfmsimulator::reconstruct(
   cv::Mat_<double> frame1(2, num_points_frame1);
   cv::Mat_<double> frame2(2, num_points_frame1);
 
-  array_t* xcoord_frame_1 = &(points_frame1->coord[0]);
-  array_t* xcoord_frame_2 = &(points_frame2->coord[0]);
-  array_t* ycoord_frame_1 = &(points_frame1->coord[1]);
-  array_t* ycoord_frame_2 = &(points_frame2->coord[1]);
+  array_t *xcoord_frame_1 = &(points_frame1->coord[0]);
+  array_t *xcoord_frame_2 = &(points_frame2->coord[0]);
+  array_t *ycoord_frame_1 = &(points_frame1->coord[1]);
+  array_t *ycoord_frame_2 = &(points_frame2->coord[1]);
 
   for (size_t point_i(0); point_i < num_points_frame1; ++point_i) {
     frame1(0, point_i) = (*xcoord_frame_1)(point_i);
@@ -92,7 +91,7 @@ void Sfmsimulator::reconstruct(
   points_collapsed.push_back(frame1);
   points_collapsed.push_back(frame2);
 
-  cv::Matx33d K = _cameramodel.getK();
+  cv::Matx33d K = _cameramodel.getK_ocv();
 
   std::vector<cv::Mat> Rs_est, ts_est, points3d_estimated;
   bool is_projective(true);
@@ -101,4 +100,4 @@ void Sfmsimulator::reconstruct(
   // points3points3d_estimated, is_projective);
 }
 
-}  // namespace sfmsimulator
+} // namespace sfmsimulator

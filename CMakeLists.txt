@@ -45,9 +45,12 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie -std=c++17 -pthread  -fopenmp -
 ##LIBRARIES
 ##
 
-enable_testing()
+set(GTEST_ROOT "/usr/local/lib/gtest/")
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
+enable_testing()
+
+find_package( OpenCV REQUIRED )
 
 ##___________________________
 ##
@@ -97,7 +100,10 @@ add_library(visualizer ${VISUALIZERSOURCES})
 add_library(sfmsimulator ${SFMSIMULATORSOURCES})
 add_library(framesim ${FRAMESIMSOURCES})
 
-#target_link_libraries(solver bench octree)
+target_link_libraries(pointclassifier ${OpenCV_LIBS})
+target_link_libraries(visualizer ${OpenCV_LIBS})
+target_link_libraries(sfmsimulator ${OpenCV_LIBS})
+target_link_libraries(framesim ${OpenCV_LIBS})
 
 add_executable (${PROJECT_NAME}  ${MAINSOURCES})
 

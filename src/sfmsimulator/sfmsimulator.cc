@@ -2,7 +2,7 @@
 #include "sfmsimulator.hh"
 
 #include <opencv2/core/core.hpp>
-//#include <opencv2/sfm.hpp>
+#include <opencv2/sfm.hpp>
 
 #include <cassert>
 

@@ -2,9 +2,6 @@
 #include "pc_triangulationerror.hh"
 #include "sfmsimulator.hh"
 
-#define CERES_FOUND 1
-#define CV_OVERRIDE override
-
 #include <opencv2/core/affine.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>

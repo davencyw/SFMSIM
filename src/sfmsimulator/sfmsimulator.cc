@@ -59,6 +59,12 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
   std::cout << "STEPS: " << steps << "\n\n\n";
+
+  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
+    *_fstream_output_weights << _weights(weight_i) << ",";
+  }
+  *_fstream_output_weights << "\n";
+
   doSteps(steps);
 }
 
@@ -137,11 +143,6 @@ void Sfmsimulator::step() {
     cameraposes.push_back(pose_i);
   }
 
-  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
-    *_fstream_output_weights << _weights(weight_i) << ",";
-  }
-  *_fstream_output_weights << "\n";
-
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, world_points, cameraposes, _cameramodel, _weights);
 
@@ -153,6 +154,11 @@ void Sfmsimulator::step() {
     _weights = _pointclassifier->classifynext(reconstruct);
     std::cout << " -    classify \n";
   }
+
+  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
+    *_fstream_output_weights << _weights(weight_i) << ",";
+  }
+  *_fstream_output_weights << "\n";
 
   _scene_window_world.pop_back();
   _scene_window_image.pop_back();

@@ -1,3 +1,4 @@
+#include "bundleadjustment.hh"
 #include "pc_triangulationerror.hh"
 #include "sfmsimulator.hh"
 
@@ -15,7 +16,6 @@ namespace sfmsimulator {
 
 Sfmsimulator::Sfmsimulator(Sfmconfig config)
     : _config(config), _cameramodel(config.cameramodel),
-      _K(config.cameramodel.getK_ocv()),
       _framesimulator(framesimulator::Framesimulator(config.filepaths,
                                                      config.cameramodel)) {
   using pct = pointclassifier::Pointclassifier_type;
@@ -116,53 +116,11 @@ void Sfmsimulator::step() {
 Sfmreconstruction
 Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
                           std::shared_ptr<points::Points2d> points_frame2) {
-  std::vector<cv::Mat> points_collapsed;
-  Sfmreconstruction reconstruction;
 
-  // cast SOA-pointdata to the reconstruct sfm api of opencv
-  const size_t num_points_frame1(points_frame1->coord[0].size());
-  const size_t num_points_frame2(points_frame2->coord[0].size());
-  assert(num_points_frame1 == num_points_frame2);
+  // TODO(dave): feed cameraposes and 3d poses
 
-  cv::Mat_<double> frame1(2, num_points_frame1);
-  cv::Mat_<double> frame2(2, num_points_frame1);
-
-  array_t *xcoord_frame_1 = &(points_frame1->coord[0]);
-  array_t *xcoord_frame_2 = &(points_frame2->coord[0]);
-  array_t *ycoord_frame_1 = &(points_frame1->coord[1]);
-  array_t *ycoord_frame_2 = &(points_frame2->coord[1]);
-
-  for (size_t point_i(0); point_i < num_points_frame1; ++point_i) {
-    frame1(0, point_i) = (*xcoord_frame_1)(point_i);
-    frame1(1, point_i) = (*ycoord_frame_1)(point_i);
-    frame2(0, point_i) = (*xcoord_frame_2)(point_i);
-    frame2(1, point_i) = (*ycoord_frame_2)(point_i);
-  }
-
-  points_collapsed.push_back(frame1);
-  points_collapsed.push_back(frame2);
-
-  std::vector<cv::Mat> rotation_estimate, translation_estimate,
-      points3d_estimated;
-  bool is_projective(true);
-  cv::sfm::reconstruct(points_collapsed, rotation_estimate,
-                       translation_estimate, _K, points3d_estimated,
-                       is_projective);
-
-  // TODO(dave): this could probably done easier!!
-  mat44_t transform_eigen(mat44_t::Zero());
-  mat33_t rotation_eigen;
-  vec4_t translation_eigen(vec4_t::Ones());
-  cv::cv2eigen(rotation_estimate[0], rotation_eigen);
-  cv::cv2eigen(translation_estimate[0], translation_eigen);
-
-  transform_eigen.block<3, 3>(0, 0) = rotation_eigen;
-  transform_eigen.block<4, 1>(0, 3) = translation_eigen;
-  //
-  reconstruction.transformation = std::make_shared<mat44_t>(transform_eigen);
-  // reconstruction.point3d_estimate;
-
-  return reconstruction;
+  return bundleadjustment::Bundleadjustment::adjustBundle(
+      points_frame1, points_frame2, , _cameramodel);
 }
 
 } // namespace sfmsimulator

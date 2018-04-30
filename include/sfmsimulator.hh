@@ -29,6 +29,7 @@ struct Sfmconfig {
 struct Sfmreconstruction {
   std::shared_ptr<mat44_t> transformation;
   std::shared_ptr<points::Points3d> point3d_estimate;
+  std::vector<precision_t> reprojection_error;
 };
 
 class Sfmsimulator {
@@ -39,8 +40,8 @@ public:
   void run();
   void doSteps(const size_t steps);
   void step();
-  inline void enablevisualization() { _visualize = true; }
-  inline void disablevisualization() { _visualize = false; }
+  inline void enableVisualization() { _visualize = true; }
+  inline void disableVisualization() { _visualize = false; }
 
   ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
 
@@ -54,7 +55,6 @@ private:
   const Sfmconfig _config;
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;
   const cameramodel::Cameramodel _cameramodel;
-  const cv::Matx33d _K;
   framesimulator::Framesimulator _framesimulator;
 
   // scene window

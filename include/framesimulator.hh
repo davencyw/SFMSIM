@@ -28,7 +28,12 @@ public:
   }
 
   // projects current landmarks onto image plan of camerapose
-  points::Points2d step_GetImagePoints();
+  points::Points2d getImagePoints() const;
+  points::Points3d getWorldPoints() const;
+  mat44_t getCameraPoseMat() const;
+  vec6_t getCameraPose() const;
+
+  void step();
   const inline size_t updatesLeft() const {
     return _header_camera_poses - _steps;
   }
@@ -36,9 +41,8 @@ public:
 private:
   // updates all 3d landmarks in the scene at the current step
   void update3dScenePoints();
-
   // update camerapose to current pose
-  mat44_t updateCameraPose();
+  void updateCameraPose();
 
   // filepaths
   const std::string _file_camera_poses;
@@ -58,13 +62,14 @@ private:
   // number of executed steps / updates
   size_t _steps = 0;
 
-  // all landmarks
-  points::Points3d _scene_3d_points;
-
   const cameramodel::Imageplane _imageplane;
-  // TODO(dave): check if ocv _K is even used!
-  const cv::Matx33d _K_ocv;
   const mat33_t _K_eigen;
+
+  // current step data
+  points::Points2d _step_image_points;
+  points::Points3d _step_world_points;
+  vec6_t _step_camera_pose;
+  mat44_t _step_camera_pose_mat;
 };
 } // namespace sfmsimulator::framesimulator
 

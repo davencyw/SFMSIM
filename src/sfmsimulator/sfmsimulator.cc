@@ -69,8 +69,10 @@ void Sfmsimulator::doSteps(const size_t steps) {
 void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
-  _scene_window_image.push_front(std::make_shared<points::Points2d>(
-      _framesimulator.step_GetImagePoints()));
+  _framesimulator.step();
+
+  _scene_window_image.push_front(
+      std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
 
   // initialization step
   if (_scene_window_image.size() < 2) {
@@ -84,11 +86,9 @@ void Sfmsimulator::step() {
   // of the deque!
   std::shared_ptr<points::Points3d> points_world2;
   std::cout << " -    reconstruction \n";
-  Sfmreconstruction reconstruction(
-      reconstruct(_scene_window_image[1], _scene_window_image[0]));
-  _scene_window_world.push_front(reconstruction.point3d_estimate);
 
-  _scene_camera_poses.push_front(reconstruction.camerpose_estimate[1]);
+  //_scene_window_world.push_front(reconstruction.point3d_estimate);
+  //_scene_camera_poses.push_front(reconstruction.camerpose_estimate[1]);
 
   // needs two 3d pointestimate for initialization
   if (_scene_window_world.size() < 2) {
@@ -108,16 +108,6 @@ void Sfmsimulator::step() {
   //   _scene_window_world.pop_back();
   _scene_window_image.pop_back();
   ++_step;
-}
-
-Sfmreconstruction
-Sfmsimulator::reconstruct(std::shared_ptr<points::Points2d> points_frame1,
-                          std::shared_ptr<points::Points2d> points_frame2) {
-
-  // TODO(dave): feed cameraposes and 3d poses
-
-  return bundleadjustment::Bundleadjustment::adjustBundle(
-      points_frame1, points_frame2, , _cameramodel);
 }
 
 } // namespace sfmsimulator

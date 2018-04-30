@@ -14,7 +14,7 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     : _file_camera_poses(file_camera_poses),
       _file_3d_static_landmarks(file_3d_static_landmarks),
       _file_3d_dynamic_landmarks(file_3d_dynamic_landmarks),
-      _imageplane(cameramodel.getImageplane()), _K_ocv(cameramodel.getK_ocv()),
+      _imageplane(cameramodel.getImageplane()),
       _K_eigen(cameramodel.getK_eigen()) {
   _fstream_camera_poses = std::make_unique<std::ifstream>();
   _fstream_3d_dynamic_landmarks = std::make_unique<std::ifstream>();
@@ -44,13 +44,13 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
   if (fstream_3d_static_landmarks.good()) {
     fstream_3d_static_landmarks >> _header_3d_static_landmarks;
 
-    _scene_3d_points =
+    _step_world_points =
         points::Points3d(_header_3d_static_landmarks +
                          std::get<1>(_header_3d_dynamic_landmarks));
 
-    array_t *xposition_3d_all(&(_scene_3d_points.coord[0]));
-    array_t *yposition_3d_all(&(_scene_3d_points.coord[1]));
-    array_t *zposition_3d_all(&(_scene_3d_points.coord[2]));
+    array_t *xposition_3d_all(&(_step_world_points.coord[0]));
+    array_t *yposition_3d_all(&(_step_world_points.coord[1]));
+    array_t *zposition_3d_all(&(_step_world_points.coord[2]));
 
     // start after dynamic points
     size_t global_landmark_index(std::get<1>(_header_3d_dynamic_landmarks));
@@ -73,11 +73,9 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
 void Framesimulator::update3dScenePoints() {
   // read and update dynamic points from next timestep
   size_t num_dynamic_points(std::get<1>(_header_3d_dynamic_landmarks));
-  const size_t num_all_landmarks(_header_3d_static_landmarks +
-                                 num_dynamic_points);
-  array_t *xposition_3d_all(&(_scene_3d_points.coord[0]));
-  array_t *yposition_3d_all(&(_scene_3d_points.coord[1]));
-  array_t *zposition_3d_all(&(_scene_3d_points.coord[2]));
+  array_t *xposition_3d_all(&(_step_world_points.coord[0]));
+  array_t *yposition_3d_all(&(_step_world_points.coord[1]));
+  array_t *zposition_3d_all(&(_step_world_points.coord[2]));
 
   for (size_t dynamic_point_i(0); dynamic_point_i < num_dynamic_points;
        dynamic_point_i++) {
@@ -89,13 +87,18 @@ void Framesimulator::update3dScenePoints() {
   ++_steps;
 }
 
-mat44_t Framesimulator::updateCameraPose() {
+void Framesimulator::updateCameraPose() {
 
   precision_t x_rotation(0.0), y_rotation(0.0), z_rotation(0.0);
   vec4_t translation = vec4_t::Ones();
 
   *_fstream_camera_poses >> translation(0) >> translation(1) >>
       translation(2) >> x_rotation >> y_rotation >> z_rotation;
+
+  _step_camera_pose(0) = x_rotation;
+  _step_camera_pose(1) = y_rotation;
+  _step_camera_pose(2) = z_rotation;
+  _step_camera_pose.block<3, 1>(3, 0) = translation.block<3, 1>(0, 0);
 
   // euler angles
   mat33_t rotation;
@@ -110,31 +113,43 @@ mat44_t Framesimulator::updateCameraPose() {
   mat44_t transformation = mat44_t::Zero();
   transformation.block<3, 3>(0, 0) = rotation;
   transformation.col(3) = translation;
-
-  return transformation;
+  _step_camera_pose_mat = transformation;
 }
 
-points::Points2d Framesimulator::step_GetImagePoints() {
-  // read next poses of dynamic landmarks
+points::Points2d Framesimulator::getImagePoints() const {
+  return _step_image_points;
+}
+
+points::Points3d Framesimulator::getWorldPoints() const {
+  return _step_world_points;
+}
+
+mat44_t Framesimulator::getCameraPoseMat() const {
+  return _step_camera_pose_mat;
+}
+
+vec6_t Framesimulator::getCameraPose() const { return _step_camera_pose; }
+
+void Framesimulator::step() {
   update3dScenePoints();
+  updateCameraPose();
 
   // next poses of camera
-  const mat44_t world_to_camera(updateCameraPose());
-  const mat44_t camera_to_world(world_to_camera.inverse());
+  const mat44_t camera_to_world(_step_camera_pose_mat.inverse());
 
   const size_t image_width(_imageplane.width);
   const size_t image_height(_imageplane.height);
 
-  const size_t numpoints(_scene_3d_points.numpoints);
+  const size_t numpoints(_step_world_points.numpoints);
   points::Points2d projected(numpoints);
 
   // TODO(dave) rewrite matrix-vector^n computation efficiently without creating
   // vectors!
   for (size_t point_i(0); point_i < numpoints; point_i++) {
     vec4_t point_vec4(vec4_t::Ones());
-    point_vec4(0) = _scene_3d_points.coord[0](point_i);
-    point_vec4(1) = _scene_3d_points.coord[1](point_i);
-    point_vec4(2) = _scene_3d_points.coord[2](point_i);
+    point_vec4(0) = _step_world_points.coord[0](point_i);
+    point_vec4(1) = _step_world_points.coord[1](point_i);
+    point_vec4(2) = _step_world_points.coord[2](point_i);
 
     // project onto camera
     vec4_t lm = camera_to_world * point_vec4;
@@ -156,7 +171,7 @@ points::Points2d Framesimulator::step_GetImagePoints() {
     }
   }
 
-  return projected;
+  _step_image_points = projected;
 }
 
 } // namespace sfmsimulator::framesimulator

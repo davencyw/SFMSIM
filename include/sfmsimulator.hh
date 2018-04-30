@@ -46,11 +46,6 @@ public:
   ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
 
 private:
-  // calls opencv::sfm::reconstruct to estimate camera odometry and 3d landmarks
-  Sfmreconstruction
-  reconstruct(std::shared_ptr<points::Points2d> points_frame1,
-              std::shared_ptr<points::Points2d> points_frame2);
-
   // model configuration
   const Sfmconfig _config;
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;

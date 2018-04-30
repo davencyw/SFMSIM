@@ -61,14 +61,15 @@ Sfmreconstruction adjustBundle(
     const std::vector<std::shared_ptr<points::Points2d>> &points_frames,
     const std::shared_ptr<points::Points3d> &points_world,
     const std::vector<vec6_t> &cameraposes,
-    const cameramodel::Cameramodel &camera, const array_t weights) {
+    const cameramodel::Cameramodel &camera, const array_t &weights) {
 
   // Create residuals for each observation in the bundle adjustment problem.
   // The
   // parameters for cameras and points are added automatically.
   ceres::Problem problem;
 
-  mat33_t intrinsics(camera.getK_eigen());
+  const size_t numframes(points_frames.size());
+  const mat33_t intrinsics(camera.getK_eigen());
   double focal = intrinsics(0, 0);
 
   size_t numpoints = points_frames[0]->numpoints;
@@ -76,6 +77,7 @@ Sfmreconstruction adjustBundle(
   std::vector<vec6_t> mutable_cameraposes(cameraposes);
 
   const std::array<array_t, 3> *coord_world(&(points_world->coord));
+  std::vector<ceres::ResidualBlockId> residual_block_ids;
 
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     mutable_points3d[point_i] =
@@ -92,12 +94,14 @@ Sfmreconstruction adjustBundle(
       if (uvx < 0 && uvy < 0) {
         continue;
       }
+
       ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
           uvx - intrinsics(0, 2), uvy - intrinsics(1, 2), weights(point_i));
 
-      problem.AddResidualBlock(cost_function, NULL,
-                               mutable_cameraposes[framecounter].data(),
-                               mutable_points3d[point_i].data(), &focal);
+      ceres::ResidualBlockId blockid = problem.AddResidualBlock(
+          cost_function, nullptr, mutable_cameraposes[framecounter].data(),
+          mutable_points3d[point_i].data(), &focal);
+      residual_block_ids.push_back(blockid);
       ++framecounter;
     }
   }
@@ -112,7 +116,30 @@ Sfmreconstruction adjustBundle(
   options.logging_type = ceres::LoggingType::SILENT;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  std::cout << summary.BriefReport() << "\n";
+  // std::cout << summary.BriefReport() << "\n";
+
+  ceres::Problem::EvaluateOptions evaloptions;
+  evaloptions.residual_blocks = residual_block_ids;
+  double total_cost = 0.0;
+  std::vector<precision_t> residuals;
+  problem.Evaluate(evaloptions, &total_cost, &residuals, nullptr, nullptr);
+
+  Sfmreconstruction reconstruct;
+  array_t temp_error = Eigen::Map<array_t>(residuals.data(), residuals.size());
+  array_t error = array_t::Zero(numpoints);
+
+  // collapse residuals
+  for (size_t residual_i(0); residual_i < temp_error.size() / numframes;
+       residual_i += 2) {
+    size_t index(residual_i);
+    for (size_t residual_j(0); residual_j < numframes; ++residual_j) {
+      index += numpoints;
+      error(residual_i / 2) += temp_error(index) * temp_error(index) +
+                               temp_error(index + 1) * temp_error(index + 1);
+    }
+  }
+
+  reconstruct.reprojection_error = error;
 
   if (not(summary.termination_type == ceres::CONVERGENCE)) {
     std::cerr << "Bundle adjustment failed." << std::endl;
@@ -120,7 +147,6 @@ Sfmreconstruction adjustBundle(
     return empty;
   }
 
-  Sfmreconstruction reconstruct;
   std::shared_ptr<points::Points3d> world_estimate =
       std::make_shared<points::Points3d>(points::Points3d(numpoints));
   for (size_t point_i(0); point_i < numpoints; ++point_i) {

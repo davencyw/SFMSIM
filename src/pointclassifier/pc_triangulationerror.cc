@@ -6,11 +6,10 @@ const array_t
 PC_Triangulationerror::classifynext(Sfmreconstruction reconstruct) const {
   array_t weights = reconstruct.reprojection_error;
   precision_t max = weights.maxCoeff();
-
   precision_t expweightdist(0.1);
-
   weights /= max;
   weights = 1.0 - (weights.pow(expweightdist) - 1.0) / (expweightdist - 1.0);
+
   return weights;
 }
 

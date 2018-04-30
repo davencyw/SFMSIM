@@ -3,6 +3,8 @@
 
 #include "pointclassifier.hh"
 
+#include <iostream>
+
 namespace sfmsimulator::pointclassifier {
 
 class PC_Triangulationerror : public Pointclassifier {

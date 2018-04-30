@@ -75,6 +75,7 @@ void Sfmsimulator::step() {
   // initialization step
   if (_scene_window_image.size() < 2) {
     assert(_step == 0);
+    _weights = array_t::Ones(_scene_window_image[0]->numpoints);
     ++_step;
     return;
   }
@@ -90,8 +91,6 @@ void Sfmsimulator::step() {
 
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
-  // TODO(dave): get weights from classifier
-  _weights = array_t::Ones(_scene_window_image[0]->numpoints);
 
   for (auto &frame_i : _scene_window_image) {
     frames.push_back(frame_i);
@@ -108,11 +107,8 @@ void Sfmsimulator::step() {
   _scene_window_cameraposes_mat.push_front(reconstruct.camerpose_estimate[1]);
 
   if (_pointclassifier) {
-    //   // classify and reconstruct with only static points
-    //   _pointclassifier->classifynext(
-    //       _scene_window_image[1], _scene_window_image[0],
-    //       _scene_window_world[1],
-    //       _scene_window_world[0]);
+    // classify and reconstruct with only static points
+    _weights = _pointclassifier->classifynext(reconstruct);
     std::cout << " -    classify \n";
   }
 

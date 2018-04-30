@@ -2,6 +2,8 @@
 #include "pc_triangulationerror.hh"
 #include "sfmsimulator.hh"
 
+#include <random>
+
 #include <opencv2/core/affine.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -80,10 +82,12 @@ void Sfmsimulator::step() {
       std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
   _scene_window_cameraposes.push_front(_framesimulator.getCameraPose());
 
+  const size_t numpoints(_scene_window_image[0]->numpoints);
+
   // initialization step
   if (_scene_window_image.size() < 2) {
     assert(_step == 0);
-    _weights = array_t::Ones(_scene_window_image[0]->numpoints);
+    _weights = array_t::Ones(numpoints);
     ++_step;
     return;
   }
@@ -98,13 +102,38 @@ void Sfmsimulator::step() {
   std::shared_ptr<points::Points3d> world_points(
       std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
 
+  // TODO(dave): add noise to worldpoints and camerapose
+  precision_t max = std::max(world_points->coord[0].maxCoeff(),
+                             std::max(world_points->coord[1].maxCoeff(),
+                                      world_points->coord[2].maxCoeff()));
+  max *= 0.03;
+
+  // TODO(dave): encapsulate this
+  std::random_device rd{};
+  std::mt19937 gen{rd()};
+  std::normal_distribution<> d{0.5, 1.0 / 6.0};
+
+  for (size_t point_i(0); point_i < numpoints; ++point_i) {
+    precision_t random(d(gen));
+    world_points->coord[0] += max * random;
+    random = d(gen);
+    world_points->coord[1] += max * random;
+    random = d(gen);
+    world_points->coord[2] += max * random;
+  }
+
+  max = _scene_window_cameraposes.front().maxCoeff();
+  for (size_t param_i(0); param_i < 6; ++param_i) {
+    const precision_t random(d(gen));
+    _scene_window_cameraposes.front()(param_i) += max * random;
+  }
+
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
 
   for (auto &frame_i : _scene_window_image) {
     frames.push_back(frame_i);
   }
-
   for (auto &pose_i : _scene_window_cameraposes) {
     cameraposes.push_back(pose_i);
   }

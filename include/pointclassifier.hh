@@ -7,7 +7,15 @@
 
 #include <vector>
 
-namespace sfmsimulator::pointclassifier {
+namespace sfmsimulator {
+
+struct Sfmreconstruction {
+  std::vector<std::shared_ptr<mat44_t>> camerpose_estimate;
+  std::shared_ptr<points::Points3d> point3d_estimate;
+  array_t reprojection_error;
+};
+
+namespace pointclassifier {
 
 enum Pointclassifier_type { PC_Triangulationerror_t };
 
@@ -18,11 +26,7 @@ public:
       : _cameramodel(cameramodel) {}
 
   // classifies points into static and dynamic points
-  virtual const array_t classifynext(
-      const std::shared_ptr<points::Points2d> image_points_frame_1,
-      const std::shared_ptr<points::Points2d> image_points_frame_2,
-      const std::shared_ptr<points::Points3d> world_points_frame_1,
-      const std::shared_ptr<points::Points3d> world_points_frame_2) const = 0;
+  virtual const array_t classifynext(Sfmreconstruction reconstruct) const = 0;
 
   // clusters dynamic points specified in type and creates convex hull
   virtual void cluster(const points::Points2d image_points,
@@ -32,6 +36,7 @@ protected:
   const cameramodel::Cameramodel _cameramodel;
 };
 
-} // namespace sfmsimulator::pointclassifier
+} // namespace pointclassifier
+} /* sfmsimulator */
 
 #endif /* end of include guard: __POINTCLASSIFIER_HH__ */

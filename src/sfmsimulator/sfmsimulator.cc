@@ -90,6 +90,7 @@ void Sfmsimulator::step() {
 
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
+  // TODO(dave): get weights from classifier
   _weights = array_t::Ones(_scene_window_image[0]->numpoints);
 
   for (auto &frame_i : _scene_window_image) {

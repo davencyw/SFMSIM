@@ -26,12 +26,6 @@ struct Sfmconfig {
   std::vector<std::string> filepaths;
 };
 
-struct Sfmreconstruction {
-  std::vector<std::shared_ptr<mat44_t>> camerpose_estimate;
-  std::shared_ptr<points::Points3d> point3d_estimate;
-  std::vector<precision_t> reprojection_error;
-};
-
 class Sfmsimulator {
 public:
   Sfmsimulator(Sfmconfig config);

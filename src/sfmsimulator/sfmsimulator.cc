@@ -31,9 +31,6 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   _file_output_weights = config.filepaths[3];
   _fstream_output_weights = std::make_unique<std::ofstream>();
   _fstream_output_weights->open(_file_output_weights);
-  if (_fstream_output_weights->good()) {
-    *_fstream_output_weights << "WEIGHTS\n";
-  }
 
   std::cout
       << "\033[0m\n"
@@ -101,6 +98,8 @@ void Sfmsimulator::step() {
 
   std::shared_ptr<points::Points3d> world_points(
       std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
+
+  std::cout << "numpointstotal: " << world_points->numpoints << "\n";
 
   // TODO(dave): add noise to worldpoints and camerapose
   precision_t max = std::max(world_points->coord[0].maxCoeff(),

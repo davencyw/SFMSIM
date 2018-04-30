@@ -2,7 +2,8 @@
 ###################
 data/
 build/
-#ext/
+ext/
+results/
 
 # Compiled source #
 ###################

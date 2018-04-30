@@ -134,7 +134,6 @@ void Framesimulator::step() {
   update3dScenePoints();
   updateCameraPose();
 
-  // next poses of camera
   const mat44_t camera_to_world(_step_camera_pose_mat.inverse());
 
   const size_t image_width(_imageplane.width);

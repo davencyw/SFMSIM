@@ -116,7 +116,7 @@ Sfmreconstruction adjustBundle(
   options.logging_type = ceres::LoggingType::SILENT;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  // std::cout << summary.BriefReport() << "\n";
+  std::cout << summary.BriefReport() << "\n";
 
   ceres::Problem::EvaluateOptions evaloptions;
   evaloptions.residual_blocks = residual_block_ids;

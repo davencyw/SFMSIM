@@ -26,12 +26,14 @@ int main(int argc, char const *argv[]) {
   std::string camera_poses("../data/test_single/camera_poses.csv");
   std::string dynamic_landmarks("../data/test_single/landmark_dynamic_3d.csv");
   std::string static_landmarks("../data/test_single/landmark_static_3d.csv");
+  std::string output_weights("out_weights.csv");
 
   sfmsimulator::cameramodel::Cameramodel camera(1.0, 1.0, 1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);
   config.type_pointclassifier = sfmsimulator::pointclassifier::
       Pointclassifier_type::PC_Triangulationerror_t;
-  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks};
+  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
+                      output_weights};
 
   sfmsimulator::Sfmsimulator sfmsim(config);
 

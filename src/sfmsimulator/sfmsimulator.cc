@@ -26,6 +26,13 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
     break;
   }
 
+  _file_output_weights = config.filepaths[3];
+  _fstream_output_weights = std::make_unique<std::ofstream>();
+  _fstream_output_weights->open(_file_output_weights);
+  if (_fstream_output_weights->good()) {
+    *_fstream_output_weights << "WEIGHTS\n";
+  }
+
   std::cout
       << "\033[0m\n"
       << "\n\n\n\n"
@@ -45,7 +52,8 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       << "    author: david schmidig [david@davencyw.net]\n"
       << "            davencyw code  [davencyw.net]\n"
       << "            ETH Zurich\n\n"
-      << "_____________________________________________________________________"
+      << "___________________________________________________________________"
+         "__"
          "\n\n\n";
 }
 
@@ -81,7 +89,8 @@ void Sfmsimulator::step() {
   }
 
   assert(_scene_window_image.size() == 2);
-  // newer frame is older (frame2.time > frame1.time) but is placed in the front
+  // newer frame is older (frame2.time > frame1.time) but is placed in the
+  // front
   // of the deque!
   std::shared_ptr<points::Points3d> points_world2;
   std::cout << " -    reconstruction \n";
@@ -99,6 +108,11 @@ void Sfmsimulator::step() {
   for (auto &pose_i : _scene_window_cameraposes) {
     cameraposes.push_back(pose_i);
   }
+
+  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
+    *_fstream_output_weights << _weights(weight_i) << ",";
+  }
+  *_fstream_output_weights << "\n";
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, world_points, cameraposes, _cameramodel, _weights);

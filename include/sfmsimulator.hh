@@ -8,6 +8,7 @@
 #include "points.hh"
 
 #include <deque>
+#include <fstream>
 #include <iostream>
 #include <memory>
 
@@ -23,6 +24,7 @@ struct Sfmconfig {
   // 0 camera_poses
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
+  // 3 output_weights
   std::vector<std::string> filepaths;
 };
 
@@ -37,7 +39,10 @@ public:
   inline void enableVisualization() { _visualize = true; }
   inline void disableVisualization() { _visualize = false; }
 
-  ~Sfmsimulator() { std::cout << "\n\n\n\n"; }
+  ~Sfmsimulator() {
+    _fstream_output_weights->close();
+    std::cout << "\n\n\n\n";
+  }
 
 private:
   // model configuration
@@ -58,6 +63,10 @@ private:
   // simulation variables
   size_t _step = 0;
   bool _visualize = 0;
+
+  // outputstream
+  std::string _file_output_weights;
+  std::unique_ptr<std::ofstream> _fstream_output_weights;
 };
 } // namespace sfmsimulator
 

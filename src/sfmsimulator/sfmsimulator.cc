@@ -73,6 +73,7 @@ void Sfmsimulator::step() {
 
   _scene_window_image.push_front(
       std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
+  _scene_window_cameraposes.push_front(_framesimulator.getCameraPose());
 
   // initialization step
   if (_scene_window_image.size() < 2) {
@@ -87,8 +88,25 @@ void Sfmsimulator::step() {
   std::shared_ptr<points::Points3d> points_world2;
   std::cout << " -    reconstruction \n";
 
+  std::shared_ptr<points::Points3d> world_points(
+      std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
+
+  std::vector<std::shared_ptr<points::Points2d>> frames;
+  std::vector<vec6_t> cameraposes;
+
+  for (auto &frame_i : _scene_window_image) {
+    frames.push_back(frame_i);
+  }
+
+  for (auto &pose_i : _scene_window_cameraposes) {
+    cameraposes.push_back(pose_i);
+  }
+
+  bundleadjustment::adjustBundle(frames, world_points, cameraposes,
+                                 _cameramodel, _weights);
+
   //_scene_window_world.push_front(reconstruction.point3d_estimate);
-  //_scene_camera_poses.push_front(reconstruction.camerpose_estimate[1]);
+  //_scene_window_cameraposes_mat.push_front(reconstruction.camerpose_estimate[1]);
 
   // needs two 3d pointestimate for initialization
   if (_scene_window_world.size() < 2) {
@@ -107,6 +125,7 @@ void Sfmsimulator::step() {
 
   //   _scene_window_world.pop_back();
   _scene_window_image.pop_back();
+  _scene_window_cameraposes.pop_back();
   ++_step;
 }
 

@@ -52,10 +52,14 @@ private:
   const cameramodel::Cameramodel _cameramodel;
   framesimulator::Framesimulator _framesimulator;
 
+  // pointweights
+  array_t _weights;
+
   // scene window
   std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;
   std::deque<std::shared_ptr<points::Points3d>> _scene_window_world;
-  std::deque<std::shared_ptr<mat44_t>> _scene_camera_poses;
+  std::deque<std::shared_ptr<mat44_t>> _scene_window_cameraposes_mat;
+  std::deque<vec6_t> _scene_window_cameraposes;
 
   // simulation variables
   size_t _step = 0;

@@ -27,7 +27,7 @@ struct Sfmconfig {
 };
 
 struct Sfmreconstruction {
-  std::shared_ptr<mat44_t> transformation;
+  std::vector<std::shared_ptr<mat44_t>> camerpose_estimate;
   std::shared_ptr<points::Points3d> point3d_estimate;
   std::vector<precision_t> reprojection_error;
 };
@@ -60,8 +60,7 @@ private:
   // scene window
   std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;
   std::deque<std::shared_ptr<points::Points3d>> _scene_window_world;
-  std::deque<std::shared_ptr<mat44_t>> _scene_camera_transforms;
-  mat44_t _scene_camera_pose;
+  std::deque<std::shared_ptr<mat44_t>> _scene_camera_poses;
 
   // simulation variables
   size_t _step = 0;

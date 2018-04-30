@@ -86,10 +86,17 @@ class Bundleadjustment {
       size_t framecounter(0);
       for (auto &points_frame_i : points_frames) {
 
+        // TODO(dave): check if cx,cy have to be subtracted
+        // TODO(dave): check if feature points are unobserved from frame by
+        // checking if uv coordinates are < 0
+        const int uvx(points_frame_i->coord[0](point_i));
+        const int uvy(points_frame_i->coord[1](point_i));
+
+        if (uvx < 0 && uvy < 0) {
+          continue;
+        }
         ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
-            points_frame_i->coord[0](point_i) - intrinsics(0, 2),
-            points_frame_i->coord[1](point_i) - intrinsics(1, 2),
-            weights(point_i));
+            uvx - intrinsics(0, 2), uvy - intrinsics(1, 2), weights(point_i));
 
         problem.AddResidualBlock(cost_function, NULL,
                                  mutable_cameraposes[framecounter].data(),
@@ -117,41 +124,35 @@ class Bundleadjustment {
     }
 
     Sfmreconstruction reconstruct;
-    points::Points3d world_estimate(numpoints);
+    std::shared_ptr<points::Points3d> world_estimate =
+        std::make_shared<points::Points3d>(points::Points3d(numpoints));
     for (size_t point_i(0); point_i < numpoints; ++point_i) {
-      world_estimate.coord[0](point_i) = mutable_points3d[point_i](0);
-      world_estimate.coord[1](point_i) = mutable_points3d[point_i](1);
-      world_estimate.coord[2](point_i) = mutable_points3d[point_i](2);
+      world_estimate->coord[0](point_i) = mutable_points3d[point_i](0);
+      world_estimate->coord[1](point_i) = mutable_points3d[point_i](1);
+      world_estimate->coord[2](point_i) = mutable_points3d[point_i](2);
     }
 
-    //   // Implement the optimized camera poses and 3D points back into the
-    //   // reconstruction
-    //   for (size_t i = 0; i < cameraPoses.size(); i++) {
-    //     Pose &pose = cameraPoses[i];
-    //     Pose poseBefore = pose;
-    //
-    //     // Convert optimized Angle-Axis back to rotation matrix
-    //     double rotationMat[9] = {0};
-    //     ceres::AngleAxisToRotationMatrix(cameraPoses6d[i].val, rotationMat);
-    //
-    //     for (int r = 0; r < 3; r++) {
-    //       for (int c = 0; c < 3; c++) {
-    //         pose(c, r) = rotationMat[r * 3 + c]; //`rotationMat` is
-    //         col-major...
-    //       }
-    //     }
-    //
-    //     // Translation
-    //     pose(0, 3) = cameraPoses6d[i](3);
-    //     pose(1, 3) = cameraPoses6d[i](4);
-    //     pose(2, 3) = cameraPoses6d[i](5);
-    //   }
-    //
-    //   for (int i = 0; i < pointCloud.size(); i++) {
-    //     pointCloud[i].p.x = points3d[i](0);
-    //     pointCloud[i].p.y = points3d[i](1);
-    //     pointCloud[i].p.z = points3d[i](2);
-    //   }
+    reconstruct.point3d_estimate = world_estimate;
+
+    for (auto &camerapose_i : mutable_cameraposes) {
+      std::shared_ptr<mat44_t> pose = std::make_shared<mat44_t>(mat44_t());
+      precision_t rotationmat[9] = {0};
+      ceres::AngleAxisToRotationMatrix(camerapose_i.data(), rotationmat);
+      // TODO(dave) rotation
+
+      for (int r(0); r < 3; r++) {
+        for (int c(0); c < 3; c++) {
+          (*pose)(c, r) =
+              rotationmat[r * 3 + c]; //`rotationMat` is col-major...
+        }
+      }
+      // translation
+      (*pose)(0, 3) = camerapose_i[3];
+      (*pose)(1, 3) = camerapose_i[4];
+      (*pose)(2, 3) = camerapose_i[5];
+
+      reconstruct.camerpose_estimate.push_back(pose);
+    }
   }
 };
 

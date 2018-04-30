@@ -50,8 +50,6 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       << "            ETH Zurich\n\n"
       << "_____________________________________________________________________"
          "\n\n\n";
-
-  _scene_camera_pose.setIdentity();
 }
 
 void Sfmsimulator::run() {
@@ -90,8 +88,7 @@ void Sfmsimulator::step() {
       reconstruct(_scene_window_image[1], _scene_window_image[0]));
   _scene_window_world.push_front(reconstruction.point3d_estimate);
 
-  _scene_camera_pose = _scene_camera_pose * (*reconstruction.transformation);
-  _scene_camera_transforms.push_front(reconstruction.transformation);
+  _scene_camera_poses.push_front(reconstruction.camerpose_estimate[1]);
 
   // needs two 3d pointestimate for initialization
   if (_scene_window_world.size() < 2) {

@@ -93,6 +93,7 @@ void Sfmsimulator::step() {
 
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
+  _weights = array_t::Ones(_scene_window_image[0]->numpoints);
 
   for (auto &frame_i : _scene_window_image) {
     frames.push_back(frame_i);
@@ -102,28 +103,22 @@ void Sfmsimulator::step() {
     cameraposes.push_back(pose_i);
   }
 
-  bundleadjustment::adjustBundle(frames, world_points, cameraposes,
-                                 _cameramodel, _weights);
+  Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
+      frames, world_points, cameraposes, _cameramodel, _weights);
 
-  //_scene_window_world.push_front(reconstruction.point3d_estimate);
-  //_scene_window_cameraposes_mat.push_front(reconstruction.camerpose_estimate[1]);
-
-  // needs two 3d pointestimate for initialization
-  if (_scene_window_world.size() < 2) {
-    assert(_step == 1);
-    ++_step;
-    return;
-  }
+  _scene_window_world.push_front(reconstruct.point3d_estimate);
+  _scene_window_cameraposes_mat.push_front(reconstruct.camerpose_estimate[1]);
 
   if (_pointclassifier) {
-    // classify and reconstruct with only static points
-    _pointclassifier->classifynext(
-        _scene_window_image[1], _scene_window_image[0], _scene_window_world[1],
-        _scene_window_world[0]);
+    //   // classify and reconstruct with only static points
+    //   _pointclassifier->classifynext(
+    //       _scene_window_image[1], _scene_window_image[0],
+    //       _scene_window_world[1],
+    //       _scene_window_world[0]);
     std::cout << " -    classify \n";
   }
 
-  //   _scene_window_world.pop_back();
+  _scene_window_world.pop_back();
   _scene_window_image.pop_back();
   _scene_window_cameraposes.pop_back();
   ++_step;

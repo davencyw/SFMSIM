@@ -57,7 +57,7 @@ struct SimpleReprojectionError {
   precision_t weight;
 };
 
-static Sfmreconstruction adjustBundle(
+Sfmreconstruction adjustBundle(
     const std::vector<std::shared_ptr<points::Points2d>> &points_frames,
     const std::shared_ptr<points::Points3d> &points_world,
     const std::vector<vec6_t> &cameraposes,
@@ -86,8 +86,6 @@ static Sfmreconstruction adjustBundle(
     for (auto &points_frame_i : points_frames) {
 
       // TODO(dave): check if cx,cy have to be subtracted
-      // TODO(dave): check if feature points are unobserved from frame by
-      // checking if uv coordinates are < 0
       const int uvx(points_frame_i->coord[0](point_i));
       const int uvy(points_frame_i->coord[1](point_i));
 
@@ -140,7 +138,8 @@ static Sfmreconstruction adjustBundle(
 
     for (int r(0); r < 3; r++) {
       for (int c(0); c < 3; c++) {
-        (*pose)(c, r) = rotationmat[r * 3 + c]; //`rotationMat` is col-major...
+        (*pose)(c, r) = rotationmat[r * 3 + c]; //`rotationMat` is
+                                                //      col-major...
       }
     }
     // translation

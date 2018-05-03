@@ -61,6 +61,7 @@ private:
 
   // scene window
   std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;
+  std::deque<std::shared_ptr<points::Points3d>> _scene_window_world_estimate;
   std::deque<std::shared_ptr<points::Points3d>> _scene_window_world;
   std::deque<std::shared_ptr<mat44_t>> _scene_window_cameraposes_mat;
   std::deque<vec6_t> _scene_window_cameraposes;

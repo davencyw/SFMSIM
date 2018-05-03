@@ -64,7 +64,8 @@ void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
   std::cout << "STEPS: " << steps << "\n\n\n";
 
-  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
+  for (size_t weight_i(0); weight_i < static_cast<size_t>(_weights.size());
+       ++weight_i) {
     *_fstream_output_weights << _weights(weight_i) << ",";
   }
   *_fstream_output_weights << "\n";
@@ -88,6 +89,8 @@ void Sfmsimulator::step() {
   _scene_window_image.push_back(
       std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
   _scene_window_cameraposes.push_back(_framesimulator.getCameraPose());
+  _scene_window_world.push_back(
+      std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
 
   const size_t numpoints(_scene_window_image[0]->numpoints);
 
@@ -103,9 +106,6 @@ void Sfmsimulator::step() {
 
   std::cout << " -    reconstruction \n";
 
-  std::shared_ptr<points::Points3d> world_points(
-      std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
-
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
 
@@ -119,12 +119,12 @@ void Sfmsimulator::step() {
   }
 
   // add noise to ground truth
-  addNoise(world_points, cameraposes, 0);
+  addNoise(_scene_window_world.front(), cameraposes, 0);
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
-      frames, world_points, cameraposes, _cameramodel, _weights);
+      frames, _scene_window_world.front(), cameraposes, _cameramodel, _weights);
 
-  _scene_window_world.push_front(reconstruct.point3d_estimate);
+  _scene_window_world_estimate.push_front(reconstruct.point3d_estimate);
   _scene_window_cameraposes_mat.push_front(
       reconstruct.camerapose_estimate_mat[1]);
 
@@ -136,7 +136,8 @@ void Sfmsimulator::step() {
 
   output(reconstruct);
 
-  _scene_window_world.pop_back();
+  _scene_window_world_estimate.pop_back();
+  _scene_window_world.pop_front();
   _scene_window_image.pop_front();
   _scene_window_cameraposes.pop_front();
   ++_step;
@@ -174,7 +175,8 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
 }
 
 void Sfmsimulator::output(const Sfmreconstruction &reconstruct) const {
-  for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
+  for (size_t weight_i(0); weight_i < static_cast<size_t>(_weights.size());
+       ++weight_i) {
     *_fstream_output_weights << _weights(weight_i) << ",";
   }
   *_fstream_output_weights << "\n";

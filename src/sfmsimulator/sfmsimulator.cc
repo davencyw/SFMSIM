@@ -146,24 +146,24 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
                             std::vector<vec6_t> cameraposes,
                             precision_t amount) {
 
+  if (amount == 0) {
+    return;
+  }
+
   const size_t numpoints(points->coord.size());
   //  add noise to worldpoints and camerapose
-  precision_t max = std::max(
-      points->coord[0].maxCoeff(),
-      std::max(points->coord[1].maxCoeff(), points->coord[2].maxCoeff()));
-  max *= amount;
 
   std::random_device rd{};
   std::mt19937 gen{rd()};
-  std::normal_distribution<> d{0.5, 1.0 / 6.0};
+  std::normal_distribution<> d{0, amount};
 
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     precision_t random(d(gen));
-    points->coord[0] += max * random;
+    points->coord[0] += random;
     random = d(gen);
-    points->coord[1] += max * random;
+    points->coord[1] += random;
     random = d(gen);
-    points->coord[2] += max * random;
+    points->coord[2] += random;
   }
 
   // max = _scene_window_cameraposes.front().maxCoeff();

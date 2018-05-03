@@ -9,7 +9,6 @@ PC_Triangulationerror::classifynext(Sfmreconstruction reconstruct) const {
   precision_t expweightdist(0.1);
   weights /= max;
   weights = 1.0 - (weights.pow(expweightdist) - 1.0) / (expweightdist - 1.0);
-
   return weights;
 }
 

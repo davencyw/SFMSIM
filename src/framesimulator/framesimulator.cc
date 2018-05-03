@@ -83,8 +83,6 @@ void Framesimulator::update3dScenePoints() {
         (*yposition_3d_all)(dynamic_point_i) >>
         (*zposition_3d_all)(dynamic_point_i);
   }
-
-  ++_steps;
 }
 
 void Framesimulator::updateCameraPose() {
@@ -133,6 +131,7 @@ vec6_t Framesimulator::getCameraPose() const { return _step_camera_pose; }
 void Framesimulator::step() {
   update3dScenePoints();
   updateCameraPose();
+  ++_steps;
 
   const mat44_t camera_to_world(_step_camera_pose_mat.inverse());
 

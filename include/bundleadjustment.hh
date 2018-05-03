@@ -103,7 +103,6 @@ Sfmreconstruction adjustBundle(
         std::cout << "\nSKIPPED\n";
         continue;
       }
-      //
       // std::cout << "RBLOCK:\n"
       //           << mutable_points3d[point_i] << "\nc:\n"
       //           << mutable_cameraposes[framecounter] << "\n";

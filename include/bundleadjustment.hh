@@ -96,7 +96,6 @@ Sfmreconstruction adjustBundle(
     size_t framecounter(0);
     for (auto &points_frame_i : points_frames) {
 
-      // TODO(dave): check if cx,cy have to be subtracted
       const precision_t uvx(points_frame_i->coord[0](point_i));
       const precision_t uvy(points_frame_i->coord[1](point_i));
 
@@ -104,6 +103,10 @@ Sfmreconstruction adjustBundle(
         std::cout << "\nSKIPPED\n";
         continue;
       }
+      //
+      // std::cout << "RBLOCK:\n"
+      //           << mutable_points3d[point_i] << "\nc:\n"
+      //           << mutable_cameraposes[framecounter] << "\n";
 
       ceres::CostFunction *cost_function =
           SimpleReprojectionError::Create(uvx - cx, uvy - cy, weights(point_i));

@@ -41,6 +41,7 @@ public:
 
   ~Sfmsimulator() {
     _fstream_output_weights->close();
+    _fstream_output_camera_trajectory->close();
     std::cout << "\n\n\n\n";
   }
 
@@ -65,8 +66,9 @@ private:
   bool _visualize = 0;
 
   // outputstream
-  std::string _file_output_weights;
+  std::string _file_output = "";
   std::unique_ptr<std::ofstream> _fstream_output_weights;
+  std::unique_ptr<std::ofstream> _fstream_output_camera_trajectory;
 };
 } // namespace sfmsimulator
 

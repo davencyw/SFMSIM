@@ -22,13 +22,19 @@ struct SimpleReprojectionError {
   bool operator()(const T *const camera, const T *const point,
                   const T *const focal, T *residuals) const {
     T p[3];
+    T angleaxis[3];
+    T eulerangles[3];
+    T rotation[9];
+
     // Rotate: camera[0,1,2] are the angle-axis rotation.
+    ceres::EulerAnglesToRotationMatrix(eulerangles, 1, rotation);
+    ceres::RotationMatrixToAngleAxis(rotation, angleaxis);
     ceres::AngleAxisRotatePoint(camera, point, p);
 
     // Translate: camera[3,4,5] are the translation.
-    p[0] += camera[3];
-    p[1] += camera[4];
-    p[2] += camera[5];
+    p[0] -= camera[3];
+    p[1] -= camera[4];
+    p[2] -= camera[5];
 
     // Perspective divide
     const T xp = p[0] / p[2];
@@ -70,7 +76,7 @@ Sfmreconstruction adjustBundle(
 
   const size_t numframes(points_frames.size());
   const mat33_t intrinsics(camera.getK_eigen());
-  double focal = intrinsics(0, 0);
+  precision_t focal = intrinsics(0, 0);
 
   size_t numpoints = points_frames[0]->numpoints;
   std::vector<vec3_t> mutable_points3d(numpoints);
@@ -88,10 +94,11 @@ Sfmreconstruction adjustBundle(
     for (auto &points_frame_i : points_frames) {
 
       // TODO(dave): check if cx,cy have to be subtracted
-      const int uvx(points_frame_i->coord[0](point_i));
-      const int uvy(points_frame_i->coord[1](point_i));
+      const precision_t uvx(points_frame_i->coord[0](point_i));
+      const precision_t uvy(points_frame_i->coord[1](point_i));
 
       if (uvx < 0 && uvy < 0) {
+        std::cout << "\nSKIPPED\n";
         continue;
       }
 
@@ -147,6 +154,16 @@ Sfmreconstruction adjustBundle(
     return empty;
   }
 
+  /*DEBUG/
+  for (auto &c : mutable_cameraposes) {
+    std::cout << "\n" << c << "\n";
+  }*/
+
+  /*DEBUG/
+  for (auto &p : mutable_points3d) {
+    std::cout << "\n" << p << "\n";
+  }*/
+
   std::shared_ptr<points::Points3d> world_estimate =
       std::make_shared<points::Points3d>(points::Points3d(numpoints));
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
@@ -173,7 +190,8 @@ Sfmreconstruction adjustBundle(
     (*pose)(1, 3) = camerapose_i[4];
     (*pose)(2, 3) = camerapose_i[5];
 
-    reconstruct.camerpose_estimate.push_back(pose);
+    reconstruct.camerapose_estimate_mat.push_back(pose);
+    reconstruct.camerapose_estimate.push_back(camerapose_i);
   }
   return reconstruct;
 }

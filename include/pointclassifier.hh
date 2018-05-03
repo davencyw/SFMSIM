@@ -10,7 +10,8 @@
 namespace sfmsimulator {
 
 struct Sfmreconstruction {
-  std::vector<std::shared_ptr<mat44_t>> camerpose_estimate;
+  std::vector<std::shared_ptr<mat44_t>> camerapose_estimate_mat;
+  std::vector<vec6_t> camerapose_estimate;
   std::shared_ptr<points::Points3d> point3d_estimate;
   array_t reprojection_error;
 };

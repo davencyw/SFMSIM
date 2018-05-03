@@ -5,6 +5,10 @@ build/
 ext/
 results/
 
+# Scratch #
+###################
+*scratch*
+
 # Compiled source #
 ###################
 *.com

@@ -23,17 +23,16 @@
 int main(int argc, char const *argv[]) {
   // TODO(dave): add boost program options to properly parse the input
   // input files
-  std::string camera_poses("../data/test_large0/camera_poses.csv");
-  std::string dynamic_landmarks("../data/test_large0/landmark_dynamic_3d.csv");
-  std::string static_landmarks("../data/test_large0/landmark_static_3d.csv");
-  std::string output_weights("out_weights.csv");
+  std::string folder("../data/test_single");
+  std::string camera_poses(folder + "/camera_poses.csv");
+  std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
+  std::string static_landmarks(folder + "/landmark_static_3d.csv");
 
-  sfmsimulator::cameramodel::Cameramodel camera(1.0, 1.0, 1.0, 620, 480);
+  sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);
   config.type_pointclassifier = sfmsimulator::pointclassifier::
       Pointclassifier_type::PC_Triangulationerror_t;
-  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
-                      output_weights};
+  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks};
 
   sfmsimulator::Sfmsimulator sfmsim(config);
 

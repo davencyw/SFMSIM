@@ -28,9 +28,13 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
     break;
   }
 
-  _file_output_weights = config.filepaths[3];
+  if (config.filepaths.size() > 3) {
+    _file_output = config.filepaths[3];
+  }
   _fstream_output_weights = std::make_unique<std::ofstream>();
-  _fstream_output_weights->open(_file_output_weights);
+  _fstream_output_camera_trajectory = std::make_unique<std::ofstream>();
+  _fstream_output_weights->open(_file_output + "weights.csv");
+  _fstream_output_camera_trajectory->open(_file_output + "camera.csv");
 
   std::cout
       << "\033[0m\n"
@@ -81,9 +85,9 @@ void Sfmsimulator::step() {
 
   _framesimulator.step();
 
-  _scene_window_image.push_front(
+  _scene_window_image.push_back(
       std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
-  _scene_window_cameraposes.push_front(_framesimulator.getCameraPose());
+  _scene_window_cameraposes.push_back(_framesimulator.getCameraPose());
 
   const size_t numpoints(_scene_window_image[0]->numpoints);
 
@@ -105,33 +109,31 @@ void Sfmsimulator::step() {
   std::shared_ptr<points::Points3d> world_points(
       std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
 
-  std::cout << "numpointstotal: " << world_points->numpoints << "\n";
-
-  // TODO(dave): add noise to worldpoints and camerapose
-  precision_t max = std::max(world_points->coord[0].maxCoeff(),
-                             std::max(world_points->coord[1].maxCoeff(),
-                                      world_points->coord[2].maxCoeff()));
-  max *= 0.03;
-
   // TODO(dave): encapsulate this
-  std::random_device rd{};
-  std::mt19937 gen{rd()};
-  std::normal_distribution<> d{0.5, 1.0 / 6.0};
+  //  add noise to worldpoints and camerapose
+  // precision_t max = std::max(world_points->coord[0].maxCoeff(),
+  //                            std::max(world_points->coord[1].maxCoeff(),
+  //                                     world_points->coord[2].maxCoeff()));
+  // max *= 0.03;
+  //
+  // std::random_device rd{};
+  // std::mt19937 gen{rd()};
+  // std::normal_distribution<> d{0.5, 1.0 / 6.0};
+  //
+  // for (size_t point_i(0); point_i < numpoints; ++point_i) {
+  //   precision_t random(d(gen));
+  //   world_points->coord[0] += max * random;
+  //   random = d(gen);
+  //   world_points->coord[1] += max * random;
+  //   random = d(gen);
+  //   world_points->coord[2] += max * random;
+  // }
 
-  for (size_t point_i(0); point_i < numpoints; ++point_i) {
-    precision_t random(d(gen));
-    world_points->coord[0] += max * random;
-    random = d(gen);
-    world_points->coord[1] += max * random;
-    random = d(gen);
-    world_points->coord[2] += max * random;
-  }
-
-  max = _scene_window_cameraposes.front().maxCoeff();
-  for (size_t param_i(0); param_i < 6; ++param_i) {
-    const precision_t random(d(gen));
-    _scene_window_cameraposes.front()(param_i) += max * random;
-  }
+  // max = _scene_window_cameraposes.front().maxCoeff();
+  // for (size_t param_i(0); param_i < 6; ++param_i) {
+  //   const precision_t random(d(gen));
+  //   _scene_window_cameraposes.front()(param_i) += max * random;
+  // }
 
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
@@ -147,7 +149,8 @@ void Sfmsimulator::step() {
       frames, world_points, cameraposes, _cameramodel, _weights);
 
   _scene_window_world.push_front(reconstruct.point3d_estimate);
-  _scene_window_cameraposes_mat.push_front(reconstruct.camerpose_estimate[1]);
+  _scene_window_cameraposes_mat.push_front(
+      reconstruct.camerapose_estimate_mat[1]);
 
   if (_pointclassifier) {
     // classify and reconstruct with only static points
@@ -160,9 +163,25 @@ void Sfmsimulator::step() {
   }
   *_fstream_output_weights << "\n";
 
+  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
+    // ground truth
+    *_fstream_output_camera_trajectory
+        << (_scene_window_cameraposes.back())(coeff_i) << " ";
+  }
+  *_fstream_output_camera_trajectory << "\n";
+
+  auto camerapose =
+      reconstruct
+          .camerapose_estimate[reconstruct.camerapose_estimate.size() - 1];
+  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
+    // estimate
+    *_fstream_output_camera_trajectory << camerapose(coeff_i) << " ";
+  }
+  *_fstream_output_camera_trajectory << "\n";
+
   _scene_window_world.pop_back();
-  _scene_window_image.pop_back();
-  _scene_window_cameraposes.pop_back();
+  _scene_window_image.pop_front();
+  _scene_window_cameraposes.pop_front();
   ++_step;
 }
 

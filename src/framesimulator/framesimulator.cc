@@ -92,8 +92,8 @@ void Framesimulator::updateCameraPose() {
   precision_t x_rotation(0.0), y_rotation(0.0), z_rotation(0.0);
   vec4_t translation = vec4_t::Ones();
 
-  *_fstream_camera_poses >> translation(0) >> translation(1) >>
-      translation(2) >> x_rotation >> y_rotation >> z_rotation;
+  *_fstream_camera_poses >> x_rotation >> y_rotation >> z_rotation >>
+      translation(0) >> translation(1) >> translation(2);
 
   _step_camera_pose(0) = x_rotation;
   _step_camera_pose(1) = y_rotation;
@@ -167,6 +167,9 @@ void Framesimulator::step() {
     if (is_in_image) {
       projected.coord[0](point_i) = x_image_coord_local;
       projected.coord[1](point_i) = y_image_coord_local;
+    } else {
+      projected.coord[0](point_i) = -1;
+      projected.coord[1](point_i) = -1;
     }
   }
 

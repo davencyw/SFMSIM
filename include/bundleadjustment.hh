@@ -85,6 +85,9 @@ Sfmreconstruction adjustBundle(
   const std::array<array_t, 3> *coord_world(&(points_world->coord));
   std::vector<ceres::ResidualBlockId> residual_block_ids;
 
+  const precision_t cx(intrinsics(0, 2));
+  const precision_t cy(intrinsics(1, 2));
+
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     mutable_points3d[point_i] =
         vec3_t((*coord_world)[0](point_i), (*coord_world)[1](point_i),
@@ -102,8 +105,8 @@ Sfmreconstruction adjustBundle(
         continue;
       }
 
-      ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
-          uvx - intrinsics(0, 2), uvy - intrinsics(1, 2), weights(point_i));
+      ceres::CostFunction *cost_function =
+          SimpleReprojectionError::Create(uvx - cx, uvy - cy, weights(point_i));
 
       ceres::ResidualBlockId blockid = problem.AddResidualBlock(
           cost_function, nullptr, mutable_cameraposes[framecounter].data(),

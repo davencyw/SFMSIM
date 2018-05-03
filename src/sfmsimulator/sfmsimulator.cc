@@ -119,7 +119,7 @@ void Sfmsimulator::step() {
   }
 
   // add noise to ground truth
-  addNoise(world_points, cameraposes, 0);
+  addNoise(world_points, cameraposes, 0.1);
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, world_points, cameraposes, _cameramodel, _weights);

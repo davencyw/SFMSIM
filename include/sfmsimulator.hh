@@ -46,6 +46,10 @@ public:
   }
 
 private:
+  void output(const Sfmreconstruction &reconstruct) const;
+  void addNoise(std::shared_ptr<points::Points3d> points,
+                std::vector<vec6_t> cameraposes, precision_t amount);
+
   // model configuration
   const Sfmconfig _config;
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;

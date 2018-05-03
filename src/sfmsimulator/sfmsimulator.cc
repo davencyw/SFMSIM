@@ -100,50 +100,26 @@ void Sfmsimulator::step() {
   }
 
   assert(_scene_window_image.size() == 2);
-  // newer frame is older (frame2.time > frame1.time) but is placed in the
-  // front
-  // of the deque!
-  std::shared_ptr<points::Points3d> points_world2;
+
   std::cout << " -    reconstruction \n";
 
   std::shared_ptr<points::Points3d> world_points(
       std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
 
-  // TODO(dave): encapsulate this
-  //  add noise to worldpoints and camerapose
-  // precision_t max = std::max(world_points->coord[0].maxCoeff(),
-  //                            std::max(world_points->coord[1].maxCoeff(),
-  //                                     world_points->coord[2].maxCoeff()));
-  // max *= 0.03;
-  //
-  // std::random_device rd{};
-  // std::mt19937 gen{rd()};
-  // std::normal_distribution<> d{0.5, 1.0 / 6.0};
-  //
-  // for (size_t point_i(0); point_i < numpoints; ++point_i) {
-  //   precision_t random(d(gen));
-  //   world_points->coord[0] += max * random;
-  //   random = d(gen);
-  //   world_points->coord[1] += max * random;
-  //   random = d(gen);
-  //   world_points->coord[2] += max * random;
-  // }
-
-  // max = _scene_window_cameraposes.front().maxCoeff();
-  // for (size_t param_i(0); param_i < 6; ++param_i) {
-  //   const precision_t random(d(gen));
-  //   _scene_window_cameraposes.front()(param_i) += max * random;
-  // }
-
   std::vector<std::shared_ptr<points::Points2d>> frames;
   std::vector<vec6_t> cameraposes;
 
+  // convert from deque to vector
   for (auto &frame_i : _scene_window_image) {
     frames.push_back(frame_i);
   }
+  // have to bemutable for BA, so copy into new vector
   for (auto &pose_i : _scene_window_cameraposes) {
     cameraposes.push_back(pose_i);
   }
+
+  // add noise to ground truth
+  addNoise(world_points, cameraposes, 0);
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, world_points, cameraposes, _cameramodel, _weights);
@@ -158,6 +134,46 @@ void Sfmsimulator::step() {
     std::cout << " -    classify \n";
   }
 
+  output(reconstruct);
+
+  _scene_window_world.pop_back();
+  _scene_window_image.pop_front();
+  _scene_window_cameraposes.pop_front();
+  ++_step;
+}
+
+void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
+                            std::vector<vec6_t> cameraposes,
+                            precision_t amount) {
+
+  const size_t numpoints(points->coord.size());
+  //  add noise to worldpoints and camerapose
+  precision_t max = std::max(
+      points->coord[0].maxCoeff(),
+      std::max(points->coord[1].maxCoeff(), points->coord[2].maxCoeff()));
+  max *= amount;
+
+  std::random_device rd{};
+  std::mt19937 gen{rd()};
+  std::normal_distribution<> d{0.5, 1.0 / 6.0};
+
+  for (size_t point_i(0); point_i < numpoints; ++point_i) {
+    precision_t random(d(gen));
+    points->coord[0] += max * random;
+    random = d(gen);
+    points->coord[1] += max * random;
+    random = d(gen);
+    points->coord[2] += max * random;
+  }
+
+  // max = _scene_window_cameraposes.front().maxCoeff();
+  // for (size_t param_i(0); param_i < 6; ++param_i) {
+  //   const precision_t random(d(gen));
+  //   _scene_window_cameraposes.front()(param_i) += max * random;
+  // }
+}
+
+void Sfmsimulator::output(const Sfmreconstruction &reconstruct) const {
   for (size_t weight_i(0); weight_i < _weights.size(); ++weight_i) {
     *_fstream_output_weights << _weights(weight_i) << ",";
   }
@@ -178,11 +194,6 @@ void Sfmsimulator::step() {
     *_fstream_output_camera_trajectory << camerapose(coeff_i) << " ";
   }
   *_fstream_output_camera_trajectory << "\n";
-
-  _scene_window_world.pop_back();
-  _scene_window_image.pop_front();
-  _scene_window_cameraposes.pop_front();
-  ++_step;
 }
 
 } // namespace sfmsimulator

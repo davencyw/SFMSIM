@@ -157,6 +157,10 @@ void Framesimulator::step() {
     const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
     const precision_t y_image_coord_local = pt_h(1) / pt_h(2);
 
+    std::cout << point_vec4[0] << " : " << point_vec4[1] << " : "
+              << point_vec4[2] << "\t||||\t" << x_image_coord_local << " : "
+              << y_image_coord_local << "\n";
+
     // TODO(dave)handle unobservable point ids!
     // TODO(dave): check if  observable
     // TODO(dave): do this polygon check outside of the loop for efficiency

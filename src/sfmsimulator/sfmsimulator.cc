@@ -119,7 +119,7 @@ void Sfmsimulator::step() {
   }
 
   // add noise to ground truth
-  addNoise(_scene_window_world.front(), cameraposes, 0);
+  addNoise(_scene_window_world.front(), cameraposes, 0.5);
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, _scene_window_world.front(), cameraposes, _cameramodel, _weights);
@@ -163,15 +163,14 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
     points->coord[0] += random;
     random = d(gen);
     points->coord[1] += random;
-    random = d(gen);
-    points->coord[2] += random;
+    // random = d(gen);
+    // points->coord[2] += random;
   }
 
-  // max = _scene_window_cameraposes.front().maxCoeff();
-  // for (size_t param_i(0); param_i < 6; ++param_i) {
-  //   const precision_t random(d(gen));
-  //   _scene_window_cameraposes.front()(param_i) += max * random;
-  // }
+  for (size_t param_i(0); param_i < 6; ++param_i) {
+    const precision_t random(d(gen));
+    _scene_window_cameraposes.front()(param_i) += random;
+  }
 }
 
 void Sfmsimulator::output(const Sfmreconstruction &reconstruct) const {

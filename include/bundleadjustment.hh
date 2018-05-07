@@ -26,10 +26,14 @@ struct SimpleReprojectionError {
     T eulerangles[3];
     T rotation[9];
 
+    p[0] = point[0];
+    p[1] = point[1];
+    p[2] = point[2];
+
     // Rotate: camera[0,1,2] are the angle-axis rotation.
-    ceres::EulerAnglesToRotationMatrix(eulerangles, 1, rotation);
-    ceres::RotationMatrixToAngleAxis(rotation, angleaxis);
-    ceres::AngleAxisRotatePoint(camera, point, p);
+    // ceres::EulerAnglesToRotationMatrix(eulerangles, 1, rotation);
+    // ceres::RotationMatrixToAngleAxis(rotation, angleaxis);
+    // ceres::AngleAxisRotatePoint(camera, point, p);
 
     // Translate: camera[3,4,5] are the translation.
     p[0] -= camera[3];
@@ -45,8 +49,8 @@ struct SimpleReprojectionError {
     const T predicted_y = *focal * yp;
 
     // The error is the difference between the predicted and observed position.
-    residuals[0] = (predicted_x - T(observed_x)) * weight;
-    residuals[1] = (predicted_y - T(observed_y)) * weight;
+    residuals[0] = (predicted_x - T(observed_x)) * T(weight);
+    residuals[1] = (predicted_y - T(observed_y)) * T(weight);
     return true;
   }
   // Factory to hide the construction of the CostFunction object from
@@ -103,9 +107,13 @@ Sfmreconstruction adjustBundle(
         std::cout << "\nSKIPPED\n";
         continue;
       }
-      // std::cout << "RBLOCK:\n"
-      //           << mutable_points3d[point_i] << "\nc:\n"
-      //           << mutable_cameraposes[framecounter] << "\n";
+      std::cout << "RBLOCK:\n"
+                << uvx << " : " << uvy << "\t||||\t"
+                << mutable_points3d[point_i][0] << " : "
+                << mutable_points3d[point_i][1] << " : "
+                << mutable_points3d[point_i][2] << "\tc: " << framecounter
+                << "\n";
+      // <<"\n"<< mutable_cameraposes[framecounter] << "\n";
 
       ceres::CostFunction *cost_function =
           SimpleReprojectionError::Create(uvx - cx, uvy - cy, weights(point_i));
@@ -120,11 +128,11 @@ Sfmreconstruction adjustBundle(
 
   // Make Ceres automatically detect the bundle structure.
   ceres::Solver::Options options;
-  options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.linear_solver_type = ceres::ITERATIVE_SCHUR;
   options.minimizer_progress_to_stdout = true;
-  options.max_num_iterations = 500;
-  options.eta = 1e-2;
-  options.max_solver_time_in_seconds = 10;
+  // options.max_num_iterations = 1024;
+  // options.eta = 1e-2;
+  // options.max_solver_time_in_seconds = 10;
   options.logging_type = ceres::LoggingType::SILENT;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);

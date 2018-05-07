@@ -92,6 +92,8 @@ Sfmreconstruction adjustBundle(
   const precision_t cx(intrinsics(0, 2));
   const precision_t cy(intrinsics(1, 2));
 
+  size_t skipped(0);
+
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     mutable_points3d[point_i] =
         vec3_t((*coord_world)[0](point_i), (*coord_world)[1](point_i),
@@ -104,7 +106,7 @@ Sfmreconstruction adjustBundle(
       const precision_t uvy(points_frame_i->coord[1](point_i));
 
       if (uvx < 0 && uvy < 0) {
-        std::cout << "\nSKIPPED\n";
+        ++skipped;
         continue;
       }
       // std::cout << "RBLOCK:\n"
@@ -126,11 +128,14 @@ Sfmreconstruction adjustBundle(
     }
   }
 
+  if (skipped) {
+    std::cout << "\nskipped " << skipped << " points\n";
+  }
   // Make Ceres automatically detect the bundle structure.
   ceres::Solver::Options options;
   options.linear_solver_type = ceres::ITERATIVE_SCHUR;
   options.minimizer_progress_to_stdout = true;
-  // options.max_num_iterations = 1024;
+  options.max_num_iterations = 1024;
   // options.eta = 1e-2;
   // options.max_solver_time_in_seconds = 10;
   options.logging_type = ceres::LoggingType::SILENT;
@@ -154,7 +159,7 @@ Sfmreconstruction adjustBundle(
   for (size_t error_i(0); error_i < numpoints; ++error_i) {
     for (size_t error_j(0); error_j < 4; ++error_j) {
       const precision_t local_residual(eigen_residuals(index + error_j) /
-                                       weights(error_i));
+                                       (weights(error_i) + 0.00000001));
       error(error_i) += local_residual * local_residual;
     }
     index += 4;

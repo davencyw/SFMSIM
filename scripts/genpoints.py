@@ -34,9 +34,8 @@ for dim in range(0,3) :
     dynamic = np.append(dynamic, dynamicloc, axis=1)
 
 dynamicframe = dynamic
-
 for frame in range(0,numframes-1):
-    diffxy = np.random.uniform(low=-1.5, high=1.5, size=(numdynamic,2))
+    diffxy = np.random.uniform(low=-2, high=2, size=(numdynamic,2))
     diffz = np.random.uniform(low=-0.1, high=0.2, size=(numdynamic,1))
     diff = np.append(diffxy, diffz, axis=1)
     dynamicframe = dynamicframe + diff
@@ -53,3 +52,8 @@ with open(filestatic, 'w') as modified: modified.write(firstlinestatic + "\n" + 
 firstlinedynamic = str(numframes) + " " + str(numdynamic)
 with open(filedynamic, 'r') as original: data = original.read()
 with open(filedynamic, 'w') as modified: modified.write(firstlinedynamic + "\n" + data)
+
+print "files generated: "
+print "\t\t\t"+filestatic
+print "\t\t\t"+filedynamic
+print "finished...\n\n"

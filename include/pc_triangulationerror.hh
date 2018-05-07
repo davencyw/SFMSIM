@@ -12,7 +12,8 @@ public:
   PC_Triangulationerror(cameramodel::Cameramodel camera)
       : Pointclassifier(camera) {}
 
-  const array_t classifynext(Sfmreconstruction reconstruct) const override;
+  void classifynext(const Sfmreconstruction &reconstruct,
+                    array_t &weights) const override;
 
   void cluster(const points::Points2d image_points,
                const std::vector<bool> type) const override;

@@ -107,12 +107,12 @@ Sfmreconstruction adjustBundle(
         std::cout << "\nSKIPPED\n";
         continue;
       }
-      std::cout << "RBLOCK:\n"
-                << uvx << " : " << uvy << "\t||||\t"
-                << mutable_points3d[point_i][0] << " : "
-                << mutable_points3d[point_i][1] << " : "
-                << mutable_points3d[point_i][2] << "\tc: " << framecounter
-                << "\n";
+      // std::cout << "RBLOCK:\n"
+      //           << uvx << " : " << uvy << "\t||||\t"
+      //           << mutable_points3d[point_i][0] << " : "
+      //           << mutable_points3d[point_i][1] << " : "
+      //           << mutable_points3d[point_i][2] << "\tc: " << framecounter
+      //           << "\n";
       // <<"\n"<< mutable_cameraposes[framecounter] << "\n";
 
       ceres::CostFunction *cost_function =
@@ -145,18 +145,19 @@ Sfmreconstruction adjustBundle(
   problem.Evaluate(evaloptions, &total_cost, &residuals, nullptr, nullptr);
 
   Sfmreconstruction reconstruct;
-  array_t temp_error = Eigen::Map<array_t>(residuals.data(), residuals.size());
+  array_t eigen_residuals =
+      Eigen::Map<array_t>(residuals.data(), residuals.size());
   array_t error = array_t::Zero(numpoints);
 
   // collapse residuals
-  for (size_t residual_i(0); residual_i < temp_error.size() / numframes;
-       residual_i += 2) {
-    size_t index(residual_i);
-    for (size_t residual_j(0); residual_j < numframes; ++residual_j) {
-      index += numpoints;
-      error(residual_i / 2) += temp_error(index) * temp_error(index) +
-                               temp_error(index + 1) * temp_error(index + 1);
+  size_t index(0);
+  for (size_t error_i(0); error_i < numpoints; ++error_i) {
+    for (size_t error_j(0); error_j < 4; ++error_j) {
+      const precision_t local_residual(eigen_residuals(index + error_j) /
+                                       weights(error_i));
+      error(error_i) += local_residual * local_residual;
     }
+    index += 4;
   }
 
   reconstruct.reprojection_error = error;

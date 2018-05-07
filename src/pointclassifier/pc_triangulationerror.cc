@@ -2,14 +2,40 @@
 
 namespace sfmsimulator::pointclassifier {
 
-const array_t
-PC_Triangulationerror::classifynext(Sfmreconstruction reconstruct) const {
-  array_t weights = reconstruct.reprojection_error;
-  precision_t max = weights.maxCoeff();
-  precision_t expweightdist(0.1);
-  weights /= max;
-  weights = 1.0 - (weights.pow(expweightdist) - 1.0) / (expweightdist - 1.0);
-  return weights;
+void PC_Triangulationerror::classifynext(const Sfmreconstruction &reconstruct,
+                                         array_t &weights) const {
+  array_t new_weights = reconstruct.reprojection_error;
+
+  // set tolerance
+  constexpr precision_t reproject_error_tolerance(0.01);
+  constexpr precision_t reproject_error_max(1.0);
+  constexpr precision_t expweightdist(0.5);
+
+  for (size_t i(0); i < new_weights.size(); ++i) {
+    new_weights(i) =
+        new_weights(i) < reproject_error_tolerance ? 0 : new_weights(i);
+  }
+
+  precision_t max = reproject_error_max;
+  if (max == 0) {
+    max = 1.0;
+  }
+  new_weights /= max;
+  for (size_t i(0); i < new_weights.size(); ++i) {
+    new_weights(i) = std::pow(expweightdist, new_weights(i));
+  }
+  new_weights = 1.0 - (new_weights - 1.0) / (expweightdist - 1.0);
+
+  weights = new_weights;
+  return;
+
+  // dependency on old weights
+
+  const array_t diff = new_weights - weights;
+  weights = weights * diff + new_weights; // dep1
+  // weights = new_weights * diff + weights; // dep2
+  const precision_t resultmax = weights.maxCoeff();
+  weights /= resultmax;
 }
 
 void PC_Triangulationerror::cluster(const points::Points2d image_points,

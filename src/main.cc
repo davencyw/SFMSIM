@@ -23,7 +23,9 @@
 int main(int argc, char const *argv[]) {
   // TODO(dave): add boost program options to properly parse the input
   // input files
-  std::string folder("../data/test_single");
+
+  // std::string folder("../data/test_large0");
+  std::string folder("../data/test_large0");
   std::string camera_poses(folder + "/camera_poses.csv");
   std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
   std::string static_landmarks(folder + "/landmark_static_3d.csv");

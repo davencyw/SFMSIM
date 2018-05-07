@@ -27,7 +27,8 @@ public:
       : _cameramodel(cameramodel) {}
 
   // classifies points into static and dynamic points
-  virtual const array_t classifynext(Sfmreconstruction reconstruct) const = 0;
+  virtual void classifynext(const Sfmreconstruction &reconstruct,
+                            array_t &weights) const = 0;
 
   // clusters dynamic points specified in type and creates convex hull
   virtual void cluster(const points::Points2d image_points,

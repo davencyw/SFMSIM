@@ -119,7 +119,7 @@ void Sfmsimulator::step() {
   }
 
   // add noise to ground truth
-  addNoise(_scene_window_world.front(), cameraposes, 0.5);
+  addNoise(_scene_window_world.front(), cameraposes, 1.5);
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, _scene_window_world.front(), cameraposes, _cameramodel, _weights);
@@ -130,7 +130,7 @@ void Sfmsimulator::step() {
 
   if (_pointclassifier) {
     // classify and reconstruct with only static points
-    _weights = _pointclassifier->classifynext(reconstruct);
+    _pointclassifier->classifynext(reconstruct, _weights);
     std::cout << " -    classify \n";
   }
 

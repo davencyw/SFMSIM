@@ -9,8 +9,10 @@ file = sys.argv[1]
 filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim//results/"
 
 df = pd.read_csv(filepath + file + ".csv", delimiter=",", header=None)
-df = df.transpose();
+df = df.transpose()
 #df = df.rename({0: "f1", 1: "f2", 2: "f3"}, axis="columns");
+
+df.index += 1
 
 seaborn.set(context="talk")
 seaborn.set_style("darkgrid")
@@ -21,12 +23,12 @@ counter = 0
 for column in df:
     counter += 1
     currentlabeltext = labeltext + str(counter)
-    plt.plot(df[column], label=currentlabeltext)
+    plt.plot(df[column], label=currentlabeltext, marker='o', linestyle='None')
 
 plt.title(file)
 plt.ylim(0,1.1)
 plt.xlabel("point_i")
 plt.ylabel("weight")
 plt.legend(loc="lower right")
-
+plt.savefig(file,dpi=300)
 plt.show()

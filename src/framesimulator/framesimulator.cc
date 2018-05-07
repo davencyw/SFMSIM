@@ -10,12 +10,13 @@ namespace sfmsimulator::framesimulator {
 Framesimulator::Framesimulator(const std::string file_camera_poses,
                                const std::string file_3d_static_landmarks,
                                const std::string file_3d_dynamic_landmarks,
-                               const cameramodel::Cameramodel cameramodel)
+                               const cameramodel::Cameramodel cameramodel,
+                               const bool noise)
     : _file_camera_poses(file_camera_poses),
       _file_3d_static_landmarks(file_3d_static_landmarks),
       _file_3d_dynamic_landmarks(file_3d_dynamic_landmarks),
       _imageplane(cameramodel.getImageplane()),
-      _K_eigen(cameramodel.getK_eigen()) {
+      _K_eigen(cameramodel.getK_eigen()), _noise(noise) {
   _fstream_camera_poses = std::make_unique<std::ifstream>();
   _fstream_3d_dynamic_landmarks = std::make_unique<std::ifstream>();
 
@@ -154,8 +155,12 @@ void Framesimulator::step() {
     const vec3_t pt_h = _K_eigen * Eigen::Map<vec3_t>(lm.data(), 3);
 
     // get image coordinates and write
-    const precision_t x_image_coord_local = pt_h(0) / pt_h(2);
-    const precision_t y_image_coord_local = pt_h(1) / pt_h(2);
+    precision_t x_image_coord_local = pt_h(0) / pt_h(2);
+    precision_t y_image_coord_local = pt_h(1) / pt_h(2);
+
+    if (_noise) {
+      addNoise(&x_image_coord_local, &y_image_coord_local);
+    }
 
     // std::cout << point_vec4[0] << " : " << point_vec4[1] << " : "
     //           << point_vec4[2] << "\t||||\t" << x_image_coord_local << " : "

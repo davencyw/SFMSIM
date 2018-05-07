@@ -25,7 +25,7 @@ int main(int argc, char const *argv[]) {
   // input files
 
   // std::string folder("../data/test_large0");
-  std::string folder("../data/test_large3");
+  std::string folder("../data/test_large1");
   std::string camera_poses(folder + "/camera_poses.csv");
   std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
   std::string static_landmarks(folder + "/landmark_static_3d.csv");

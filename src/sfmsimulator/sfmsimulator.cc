@@ -15,8 +15,8 @@ namespace sfmsimulator {
 
 Sfmsimulator::Sfmsimulator(Sfmconfig config)
     : _config(config), _cameramodel(config.cameramodel),
-      _framesimulator(framesimulator::Framesimulator(config.filepaths,
-                                                     config.cameramodel)) {
+      _framesimulator(framesimulator::Framesimulator(
+          config.filepaths, config.cameramodel, config.noise_image_detection)) {
   using pct = pointclassifier::Pointclassifier_type;
 
   switch (config.type_pointclassifier) {
@@ -70,10 +70,6 @@ void Sfmsimulator::run() {
   }
   *_fstream_output_weights << "\n";
 
-  doSteps(steps);
-}
-
-void Sfmsimulator::doSteps(const size_t steps) {
   for (size_t step_i(0); step_i < steps; step_i++) {
     step();
   }
@@ -119,7 +115,9 @@ void Sfmsimulator::step() {
   }
 
   // add noise to ground truth
-  addNoise(_scene_window_world.front(), cameraposes, 1.4);
+  if (_config.noise_camera || _config.noise_3dposition) {
+    addNoise(_scene_window_world.front(), cameraposes, 1.4);
+  }
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
       frames, _scene_window_world.front(), cameraposes, _cameramodel, _weights);
@@ -147,29 +145,32 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
                             std::vector<vec6_t> cameraposes,
                             precision_t amount) {
 
+  //  add noise to worldpoints and camerapose
   if (amount == 0) {
     return;
   }
-
-  const size_t numpoints(points->coord.size());
-  //  add noise to worldpoints and camerapose
 
   std::random_device rd{};
   std::mt19937 gen{rd()};
   std::normal_distribution<> d{0, amount};
 
-  for (size_t point_i(0); point_i < numpoints; ++point_i) {
-    precision_t random(d(gen));
-    points->coord[0] += random;
-    random = d(gen);
-    points->coord[1] += random;
-    // random = d(gen);
-    // points->coord[2] += random;
+  if (_config.noise_3dposition) {
+    const size_t numpoints(points->coord.size());
+    for (size_t point_i(0); point_i < numpoints; ++point_i) {
+      precision_t random(d(gen));
+      points->coord[0] += random;
+      random = d(gen);
+      points->coord[1] += random;
+      // no z noise for the boyz
+      // random = d(gen);
+      // points->coord[2] += random;
+    }
   }
-
-  for (size_t param_i(0); param_i < 6; ++param_i) {
-    const precision_t random(d(gen));
-    _scene_window_cameraposes.front()(param_i) += random;
+  if (_config.noise_camera) {
+    for (size_t param_i(0); param_i < 6; ++param_i) {
+      const precision_t random(d(gen));
+      _scene_window_cameraposes.front()(param_i) += random;
+    }
   }
 }
 

@@ -21,6 +21,12 @@ struct Sfmconfig {
   pointclassifier::Pointclassifier_type type_pointclassifier;
   cameramodel::Cameramodel cameramodel;
 
+  // reconstruction settings
+  size_t slidingwindowsize = 20;
+  bool noise_image_detection = true;
+  bool noise_camera = true;
+  bool noise_3dposition = true;
+
   // 0 camera_poses
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
@@ -34,8 +40,6 @@ public:
   Sfmsimulator(std::string config_file_path);
 
   void run();
-  void doSteps(const size_t steps);
-  void step();
   inline void enableVisualization() { _visualize = true; }
   inline void disableVisualization() { _visualize = false; }
 
@@ -46,6 +50,7 @@ public:
   }
 
 private:
+  void step();
   void output(const Sfmreconstruction &reconstruct) const;
   void addNoise(std::shared_ptr<points::Points3d> points,
                 std::vector<vec6_t> cameraposes, precision_t amount);

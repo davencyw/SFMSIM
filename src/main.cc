@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
   sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);
   config.type_pointclassifier = sfmsimulator::pointclassifier::
-      Pointclassifier_type::PC_Triangulationerror_t;
+      Pointclassifier_type::PC_ReprojectionErrorDep1_t;
   config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
                       testset + "_dep1"};
 

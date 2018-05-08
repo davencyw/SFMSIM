@@ -1,5 +1,5 @@
 #include "bundleadjustment.hh"
-#include "pc_triangulationerror.hh"
+#include "pc_reprojectionerror.hh"
 #include "sfmsimulator.hh"
 
 #include <random>
@@ -44,10 +44,19 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   using pct = pointclassifier::Pointclassifier_type;
 
   switch (config.type_pointclassifier) {
-  case pct::PC_Triangulationerror_t:
-    _pointclassifier = std::make_unique<pointclassifier::PC_Triangulationerror>(
-        pointclassifier::PC_Triangulationerror(_cameramodel));
+  case pct::PC_ReprojectionErrorDep1_t:
+    _pointclassifier =
+        std::make_unique<pointclassifier::PC_ReprojectionErrorDep1>(
+            pointclassifier::PC_ReprojectionErrorDep1());
     break;
+  case pct::PC_ReprojectionErrorDep2_t:
+    _pointclassifier =
+        std::make_unique<pointclassifier::PC_ReprojectionErrorDep2>(
+            pointclassifier::PC_ReprojectionErrorDep2());
+  case pct::PC_ReprojectionErrorNodep_t:
+    _pointclassifier =
+        std::make_unique<pointclassifier::PC_ReprojectionErrorNodep>(
+            pointclassifier::PC_ReprojectionErrorNodep());
   default:
     std::cout << "No classifier defined!!\n\n";
     break;

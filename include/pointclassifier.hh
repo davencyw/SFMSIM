@@ -18,20 +18,21 @@ struct Sfmreconstruction {
 
 namespace pointclassifier {
 
-enum Pointclassifier_type { PC_Noclassifier_t, PC_Triangulationerror_t };
+enum Pointclassifier_type {
+  PC_Noclassifier_t,
+  PC_ReprojectionErrorNodep_t,
+  PC_ReprojectionErrorDep1_t,
+  PC_ReprojectionErrorDep2_t
+};
 
 // TODO(dave): create class for clustering!
 class Pointclassifier {
 public:
-  Pointclassifier(cameramodel::Cameramodel cameramodel)
-      : _cameramodel(cameramodel) {}
-
   // classifies points into static and dynamic points
   virtual void classifynext(const Sfmreconstruction &reconstruct,
                             array_t &weights) const = 0;
 
 protected:
-  const cameramodel::Cameramodel _cameramodel;
 };
 
 } // namespace pointclassifier

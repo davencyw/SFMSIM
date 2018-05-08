@@ -5,6 +5,7 @@
 #include "global.hh"
 #include "points.hh"
 
+#include <string>
 #include <vector>
 
 namespace sfmsimulator {
@@ -31,8 +32,7 @@ public:
   // classifies points into static and dynamic points
   virtual void classifynext(const Sfmreconstruction &reconstruct,
                             array_t &weights) const = 0;
-
-protected:
+  virtual std::string getDescription() const = 0;
 };
 
 } // namespace pointclassifier

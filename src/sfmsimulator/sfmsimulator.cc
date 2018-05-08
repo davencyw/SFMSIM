@@ -62,6 +62,11 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
     break;
   }
 
+  if (_pointclassifier) {
+    std::cout << "classifiertype: " << _pointclassifier->getDescription()
+              << "\n\n";
+  }
+
   if (config.filepaths.size() > 3) {
     _file_output = config.filepaths[3];
   }

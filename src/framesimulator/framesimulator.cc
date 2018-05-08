@@ -45,9 +45,9 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
   if (fstream_3d_static_landmarks.good()) {
     fstream_3d_static_landmarks >> _header_3d_static_landmarks;
 
-    _step_world_points =
-        points::Points3d(_header_3d_static_landmarks +
-                         std::get<1>(_header_3d_dynamic_landmarks));
+    _numtotalpoints =
+        _header_3d_static_landmarks + std::get<1>(_header_3d_dynamic_landmarks);
+    _step_world_points = points::Points3d(_numtotalpoints);
 
     array_t *xposition_3d_all(&(_step_world_points.coord[0]));
     array_t *yposition_3d_all(&(_step_world_points.coord[1]));
@@ -122,6 +122,8 @@ void Framesimulator::updateCameraPose() {
   transformation.col(3) = translation;
   _step_camera_pose_mat = transformation;
 }
+
+size_t Framesimulator::getNumPoints() const { return _numtotalpoints; }
 
 points::Points2d Framesimulator::getImagePoints() const {
   return _step_image_points;

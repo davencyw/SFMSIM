@@ -32,6 +32,7 @@ public:
   }
 
   // projects current landmarks onto image plan of camerapose
+  size_t getNumPoints() const;
   points::Points2d getImagePoints() const;
   points::Points3d getWorldPoints() const;
   mat44_t getCameraPoseMat() const;
@@ -65,6 +66,8 @@ private:
   std::unique_ptr<std::ifstream> _fstream_camera_poses;
   std::unique_ptr<std::ifstream> _fstream_3d_dynamic_landmarks;
 
+  // number of total points
+  size_t _numtotalpoints = 0;
   // number of frames
   size_t _header_camera_poses;
   // number of landmarks

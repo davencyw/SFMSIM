@@ -8,11 +8,10 @@ import numpy as np
 import os
 import fnmatch
 
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/noise_0_3"
+filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"
 
 set = sys.argv[1]
 print "Set: " + set
-print "files: "
 seaborn.set(context="talk")
 seaborn.set_style("darkgrid")
 
@@ -23,6 +22,7 @@ for file in os.listdir(filepath):
         files.append(file)
 files = sorted(files)
 
+print "files: "
 for file in files:
 
     print file

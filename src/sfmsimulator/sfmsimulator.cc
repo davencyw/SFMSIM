@@ -53,10 +53,12 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
     _pointclassifier =
         std::make_unique<pointclassifier::PC_ReprojectionErrorDep2>(
             pointclassifier::PC_ReprojectionErrorDep2());
+    break;
   case pct::PC_ReprojectionErrorNodep_t:
     _pointclassifier =
         std::make_unique<pointclassifier::PC_ReprojectionErrorNodep>(
             pointclassifier::PC_ReprojectionErrorNodep());
+    break;
   default:
     std::cout << "No classifier defined!!\n\n";
     break;

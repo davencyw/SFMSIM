@@ -29,12 +29,12 @@ for file in os.listdir(filepath):
         labeltext = "frame "
         counter = 0
 
-        dynamicweightaverage = []
-        staticweightaverage = []
+        dynamicweightaverage = [1]
+        staticweightaverage = [1]
         array = df.as_matrix()
         length = (array.shape[0]-1)
         numframes = array.shape[1]
-        x = range(2,numframes+2)
+        x = range(1,numframes+2)
 
         for col in array.T:
             locaveragedyn = np.sum(np.abs(col[0:numdyn])) / numdyn

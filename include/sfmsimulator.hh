@@ -23,7 +23,7 @@ struct Sfmconfig {
 
   // reconstruction settings
   size_t slidingwindowsize = 20;
-  bool noise_image_detection = true;
+  bool noise_image_detection = false;
   bool noise_camera = true;
   bool noise_3dposition = true;
 

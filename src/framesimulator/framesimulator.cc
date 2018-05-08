@@ -69,6 +69,10 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
   };
   fstream_3d_static_landmarks.close();
+
+  std::random_device rd{};
+  _gen = std::mt19937{rd()};
+  _d = std::normal_distribution<>{0.0, 0.5};
 };
 
 void Framesimulator::update3dScenePoints() {

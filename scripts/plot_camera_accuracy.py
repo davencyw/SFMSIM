@@ -6,7 +6,6 @@ import pandas as pd
 import seaborn
 import numpy as np
 import os
-from os.path import basename
 import fnmatch
 
 filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/noise_0_3"
@@ -42,7 +41,7 @@ for file in files:
         for i in range(0,6):
             locerror = camera[2*frame_i][i] - camera[2*frame_i+1][i]
             error +=  locerror * locerror
-        error /= numframes
+        error /= 3
         error = math.sqrt(error)
         cameraerror.append(error)
 
@@ -56,7 +55,6 @@ for file in files:
 
 title = set+"_camera_error"
 plt.title(title)
-#plt.ylim(0,50)
 plt.xlim(0,numframes+1)
 plt.xlabel("frame")
 plt.ylabel("error")

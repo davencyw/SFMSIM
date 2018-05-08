@@ -17,24 +17,6 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
     : _config(config), _cameramodel(config.cameramodel),
       _framesimulator(framesimulator::Framesimulator(
           config.filepaths, config.cameramodel, config.noise_image_detection)) {
-  using pct = pointclassifier::Pointclassifier_type;
-
-  switch (config.type_pointclassifier) {
-  case pct::PC_Triangulationerror_t:
-    _pointclassifier = std::make_unique<pointclassifier::PC_Triangulationerror>(
-        pointclassifier::PC_Triangulationerror(_cameramodel));
-    break;
-  default:
-    break;
-  }
-
-  if (config.filepaths.size() > 3) {
-    _file_output = config.filepaths[3];
-  }
-  _fstream_output_weights = std::make_unique<std::ofstream>();
-  _fstream_output_camera_trajectory = std::make_unique<std::ofstream>();
-  _fstream_output_weights->open(_file_output + "weights.csv");
-  _fstream_output_camera_trajectory->open(_file_output + "camera.csv");
 
   std::cout
       << "\033[0m\n"
@@ -58,6 +40,26 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
       << "___________________________________________________________________"
          "__"
          "\n\n\n";
+
+  using pct = pointclassifier::Pointclassifier_type;
+
+  switch (config.type_pointclassifier) {
+  case pct::PC_Triangulationerror_t:
+    _pointclassifier = std::make_unique<pointclassifier::PC_Triangulationerror>(
+        pointclassifier::PC_Triangulationerror(_cameramodel));
+    break;
+  default:
+    std::cout << "No classifier defined!!\n\n";
+    break;
+  }
+
+  if (config.filepaths.size() > 3) {
+    _file_output = config.filepaths[3];
+  }
+  _fstream_output_weights = std::make_unique<std::ofstream>();
+  _fstream_output_camera_trajectory = std::make_unique<std::ofstream>();
+  _fstream_output_weights->open(_file_output + "_weights.csv");
+  _fstream_output_camera_trajectory->open(_file_output + "_camera.csv");
 }
 
 void Sfmsimulator::run() {
@@ -116,7 +118,7 @@ void Sfmsimulator::step() {
 
   // add noise to ground truth
   if (_config.noise_camera || _config.noise_3dposition) {
-    addNoise(_scene_window_world.front(), cameraposes, 1.4);
+    addNoise(_scene_window_world.front(), cameraposes, 0.3);
   }
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(

@@ -18,7 +18,7 @@ struct Sfmreconstruction {
 
 namespace pointclassifier {
 
-enum Pointclassifier_type { PC_Triangulationerror_t };
+enum Pointclassifier_type { PC_Noclassifier_t, PC_Triangulationerror_t };
 
 // TODO(dave): create class for clustering!
 class Pointclassifier {
@@ -29,10 +29,6 @@ public:
   // classifies points into static and dynamic points
   virtual void classifynext(const Sfmreconstruction &reconstruct,
                             array_t &weights) const = 0;
-
-  // clusters dynamic points specified in type and creates convex hull
-  virtual void cluster(const points::Points2d image_points,
-                       const std::vector<bool> type) const = 0;
 
 protected:
   const cameramodel::Cameramodel _cameramodel;

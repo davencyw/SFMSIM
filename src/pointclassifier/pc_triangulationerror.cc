@@ -32,23 +32,17 @@ void PC_Triangulationerror::classifynext(const Sfmreconstruction &reconstruct,
   }
 
   new_weights = 1.0 - (new_weights - 1.0) / (expweightdist - 1.0);
-
+  //
   // weights = new_weights;
   // return;
 
   // dependency on old weights
 
   const array_t diff = new_weights - weights;
-  // weights = weights * diff + new_weights; // dep1
-  weights = new_weights * diff + weights; // dep2
+  weights = weights * diff + new_weights; // dep1
+  // weights = new_weights * diff + weights; // dep2
   const precision_t resultmax = weights.maxCoeff();
   weights /= resultmax;
 }
 
-void PC_Triangulationerror::cluster(const points::Points2d image_points,
-                                    const std::vector<bool> type) const {
-  // TODO(dave): spherical histogram to determine movements
-  // TODO(dave): mean-shift clustering
-  // TODO(dave): compute complex hull of clusters
-}
 } // namespace sfmsimulator::pointclassifier

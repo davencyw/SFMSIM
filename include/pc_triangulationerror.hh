@@ -15,9 +15,6 @@ public:
   void classifynext(const Sfmreconstruction &reconstruct,
                     array_t &weights) const override;
 
-  void cluster(const points::Points2d image_points,
-               const std::vector<bool> type) const override;
-
 private:
 };
 

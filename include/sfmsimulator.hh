@@ -30,7 +30,7 @@ struct Sfmconfig {
   // 0 camera_poses
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
-  // 3 output_weights
+  // 3 output_filename
   std::vector<std::string> filepaths;
 };
 

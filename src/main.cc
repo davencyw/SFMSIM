@@ -25,7 +25,8 @@ int main(int argc, char const *argv[]) {
   // input files
 
   // std::string folder("../data/test_large0");
-  std::string folder("../data/test_large1");
+  std::string testset("Tlarge3");
+  std::string folder("../data/" + testset);
   std::string camera_poses(folder + "/camera_poses.csv");
   std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
   std::string static_landmarks(folder + "/landmark_static_3d.csv");
@@ -34,7 +35,8 @@ int main(int argc, char const *argv[]) {
   sfmsimulator::Sfmconfig config(camera);
   config.type_pointclassifier = sfmsimulator::pointclassifier::
       Pointclassifier_type::PC_Triangulationerror_t;
-  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks};
+  config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
+                      testset + "_dep1"};
 
   sfmsimulator::Sfmsimulator sfmsim(config);
 

@@ -38,10 +38,10 @@ int main(int argc, char const *argv[]) {
   config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
                       testset + "_nodep"};
 
-  config.camera_noise_amount = -1;
-  config.world_position_noise_amount = -1;
+  config.camera_noise_amount = 0.1;
+  config.world_position_noise_amount = 0.3;
   config.image_detection_noise_amount = -1;
-  config.slidingwindow_size = 3;
+  config.slidingwindow_size = 30;
 
   sfmsimulator::Sfmsimulator sfmsim(config);
 

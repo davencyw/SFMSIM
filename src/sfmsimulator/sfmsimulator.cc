@@ -83,6 +83,9 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   _fstream_output_camera_trajectory_groundtruth->open(_file_output +
                                                       "_camera_gt.csv");
 
+  *_fstream_output_camera_trajectory << config.slidingwindow_size
+                                     << " 0 0 0 0 0 \n";
+
   _weights = array_t::Ones(_framesimulator.getNumPoints());
 
   // init rng
@@ -107,7 +110,7 @@ void Sfmsimulator::updateSlidingWindow() {
   *_fstream_output_camera_trajectory_groundtruth << "\n";
 
   // handle noise
-  if (_config.camera_noise_amount > 0) {
+  if (_config.camera_noise_amount > 0 && _step > 0) {
     addCameraNoise();
   }
   if (_config.image_detection_noise_amount > 0) {
@@ -120,6 +123,7 @@ void Sfmsimulator::updateSlidingWindow() {
   if (_scene_window_image.size() > _config.slidingwindow_size) {
     _scene_window_image.pop_front();
     _scene_window_cameraposes.pop_front();
+    _hold_first_camera = false;
   }
 }
 
@@ -157,7 +161,8 @@ void Sfmsimulator::step() {
   }
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
-      frames, _world_points, cameraposes, _cameramodel, _weights);
+      frames, _world_points, cameraposes, _cameramodel, _weights,
+      _hold_first_camera);
 
   // push back estimates
   _scene_full_camera_estimate.push_back(reconstruct.camerapose_estimate);
@@ -192,7 +197,7 @@ void Sfmsimulator::addCameraNoise() {
 
   std::normal_distribution<> d{0, _config.camera_noise_amount};
 
-  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
+  for (size_t coeff_i(3); coeff_i < 6; ++coeff_i) {
     const precision_t random(d(_rn_generator));
     (*camera_pose)(coeff_i) += random;
   }

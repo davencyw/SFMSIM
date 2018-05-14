@@ -64,6 +64,7 @@ private:
   std::unique_ptr<pointclassifier::Pointclassifier> _pointclassifier;
   const cameramodel::Cameramodel _cameramodel;
   framesimulator::Framesimulator _framesimulator;
+  bool _hold_first_camera = true;
 
   // pointweights
   array_t _weights;

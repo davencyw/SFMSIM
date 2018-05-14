@@ -52,7 +52,6 @@ public:
 private:
   void step();
   void updateSlidingWindow();
-  void output(const Sfmreconstruction &reconstruct) const;
   void addNoise(std::shared_ptr<points::Points3d> points, vec6_t *cameraposes,
                 precision_t amount);
 

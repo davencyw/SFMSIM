@@ -209,12 +209,4 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
   }
 }
 
-void Sfmsimulator::output(const Sfmreconstruction &reconstruct) const {
-  for (size_t weight_i(0); weight_i < static_cast<size_t>(_weights.size());
-       ++weight_i) {
-    *_fstream_output_weights << _weights(weight_i) << ",";
-  }
-  *_fstream_output_weights << "\n";
-}
-
 } // namespace sfmsimulator

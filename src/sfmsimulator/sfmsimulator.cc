@@ -15,8 +15,8 @@ namespace sfmsimulator {
 
 Sfmsimulator::Sfmsimulator(Sfmconfig config)
     : _config(config), _cameramodel(config.cameramodel),
-      _framesimulator(framesimulator::Framesimulator(
-          config.filepaths, config.cameramodel, config.noise_image_detection)) {
+      _framesimulator(framesimulator::Framesimulator(config.filepaths,
+                                                     config.cameramodel)) {
 
   std::cout
       << "\033[0m\n"
@@ -72,15 +72,51 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   if (config.filepaths.size() > 3) {
     _file_output = config.filepaths[3];
   }
+
+  // start output filestreams
   _fstream_output_weights = std::make_unique<std::ofstream>();
   _fstream_output_camera_trajectory = std::make_unique<std::ofstream>();
+  _fstream_output_camera_trajectory_groundtruth =
+      std::make_unique<std::ofstream>();
   _fstream_output_weights->open(_file_output + "_weights.csv");
   _fstream_output_camera_trajectory->open(_file_output + "_camera.csv");
+  _fstream_output_camera_trajectory_groundtruth->open(_file_output +
+                                                      "_camera_gt.csv");
+
+  _weights = array_t::Ones(_framesimulator.getNumPoints());
+}
+
+void Sfmsimulator::updateSlidingWindow() {
+  _framesimulator.step();
+  _scene_window_image.push_back(
+      std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
+  _scene_window_cameraposes.push_back(_framesimulator.getCameraPose());
+  _world_points =
+      std::make_shared<points::Points3d>(_framesimulator.getWorldPoints());
+
+  // write ground truth to output
+  vec6_t *camera_ground_truth = &(_scene_window_cameraposes.back());
+  for (size_t camera_i(0); camera_i < 6; camera_i++) {
+    *_fstream_output_camera_trajectory_groundtruth
+        << (*camera_ground_truth)[camera_i] << " ";
+  }
+  *_fstream_output_camera_trajectory_groundtruth << "\n";
+
+  // handle noise
+  addNoise(_world_points, &(_scene_window_cameraposes.back()), 0.3);
+
+  if (_scene_window_image.size() > _config.slidingwindow_size) {
+    _scene_window_image.pop_front();
+    _scene_window_cameraposes.pop_front();
+  }
 }
 
 void Sfmsimulator::run() {
   const size_t steps(_framesimulator.updatesLeft());
   std::cout << "STEPS: " << steps << "\n\n\n";
+
+  // initializationstep because we need atleast two frames to reconstruct
+  updateSlidingWindow();
 
   for (size_t weight_i(0); weight_i < static_cast<size_t>(_weights.size());
        ++weight_i) {
@@ -99,69 +135,50 @@ void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
   _framesimulator.step();
-
-  _scene_window_image.push_back(
-      std::make_shared<points::Points2d>(_framesimulator.getImagePoints()));
-  _scene_window_cameraposes.push_back(_framesimulator.getCameraPose());
-  _scene_window_world.push_back(
-      std::make_shared<points::Points3d>(_framesimulator.getWorldPoints()));
-
-  const size_t numpoints(_scene_window_image[0]->numpoints);
-
-  // initialization step
-  if (_scene_window_image.size() < 2) {
-    assert(_step == 0);
-    _weights = array_t::Ones(numpoints);
-    ++_step;
-    return;
-  }
-
-  assert(_scene_window_image.size() == 2);
-
-  std::cout << " -    reconstruction \n";
-
-  std::vector<std::shared_ptr<points::Points2d>> frames;
-  std::vector<vec6_t> cameraposes;
+  updateSlidingWindow();
 
   // convert from deque to vector
+  std::vector<std::shared_ptr<points::Points2d>> frames;
+  std::vector<vec6_t> cameraposes;
   for (auto &frame_i : _scene_window_image) {
     frames.push_back(frame_i);
   }
-  // have to bemutable for BA, so copy into new vector
   for (auto &pose_i : _scene_window_cameraposes) {
     cameraposes.push_back(pose_i);
   }
 
-  // add noise to ground truth
-  if (_config.noise_camera || _config.noise_3dposition) {
-    addNoise(_scene_window_world.front(), cameraposes, 0.3);
-  }
-
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
-      frames, _scene_window_world.front(), cameraposes, _cameramodel, _weights);
+      frames, _world_points, cameraposes, _cameramodel, _weights);
 
-  _scene_window_world_estimate.push_front(reconstruct.point3d_estimate);
-  _scene_window_cameraposes_mat.push_front(
-      reconstruct.camerapose_estimate_mat[1]);
+  // push back estimates
+  _scene_full_camera_estimate.push_back(reconstruct.camerapose_estimate);
 
+  // classify points
   if (_pointclassifier) {
     // classify and reconstruct with only static points
     _pointclassifier->classifynext(reconstruct, _weights);
-    std::cout << " -    classify \n";
   }
 
-  output(reconstruct);
+  // write camera estimates to output
+  for (auto &camerapose_i : reconstruct.camerapose_estimate) {
+    for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
+      *_fstream_output_camera_trajectory << camerapose_i[coeff_i] << " ";
+    }
+    *_fstream_output_camera_trajectory << "\n";
+  }
 
-  _scene_window_world_estimate.pop_back();
-  _scene_window_world.pop_front();
-  _scene_window_image.pop_front();
-  _scene_window_cameraposes.pop_front();
+  // write weights to output
+  for (size_t weight_i(0); weight_i < static_cast<size_t>(_weights.size());
+       ++weight_i) {
+    *_fstream_output_weights << _weights(weight_i) << ",";
+  }
+  *_fstream_output_weights << "\n";
+
   ++_step;
 }
 
 void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
-                            std::vector<vec6_t> cameraposes,
-                            precision_t amount) {
+                            vec6_t *cameraposes, precision_t amount) {
 
   //  add noise to worldpoints and camerapose
   if (amount == 0) {
@@ -187,7 +204,7 @@ void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
   if (_config.noise_camera) {
     for (size_t param_i(0); param_i < 6; ++param_i) {
       const precision_t random(d(gen));
-      _scene_window_cameraposes.front()(param_i) += random;
+      (*cameraposes)(param_i) += random;
     }
   }
 }
@@ -198,22 +215,6 @@ void Sfmsimulator::output(const Sfmreconstruction &reconstruct) const {
     *_fstream_output_weights << _weights(weight_i) << ",";
   }
   *_fstream_output_weights << "\n";
-
-  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
-    // ground truth
-    *_fstream_output_camera_trajectory
-        << (_scene_window_cameraposes.back())(coeff_i) << " ";
-  }
-  *_fstream_output_camera_trajectory << "\n";
-
-  auto camerapose =
-      reconstruct
-          .camerapose_estimate[reconstruct.camerapose_estimate.size() - 1];
-  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
-    // estimate
-    *_fstream_output_camera_trajectory << camerapose(coeff_i) << " ";
-  }
-  *_fstream_output_camera_trajectory << "\n";
 }
 
 } // namespace sfmsimulator

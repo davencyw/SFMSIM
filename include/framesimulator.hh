@@ -15,16 +15,13 @@ namespace sfmsimulator::framesimulator {
 class Framesimulator {
 public:
   Framesimulator(const std::vector<std::string> filepaths,
-                 const cameramodel::Cameramodel cameramodel,
-                 const bool noise = false)
-      : Framesimulator(filepaths[0], filepaths[1], filepaths[2], cameramodel,
-                       noise) {}
+                 const cameramodel::Cameramodel cameramodel)
+      : Framesimulator(filepaths[0], filepaths[1], filepaths[2], cameramodel) {}
 
   Framesimulator(const std::string file_camera_poses,
                  const std::string file_3d_static_landmarks,
                  const std::string file_3d_dynamic_landmarks,
-                 const cameramodel::Cameramodel cameramodel,
-                 const bool noise = false);
+                 const cameramodel::Cameramodel cameramodel);
 
   ~Framesimulator() {
     _fstream_camera_poses->close();
@@ -49,11 +46,6 @@ private:
   // update camerapose to current pose
   void updateCameraPose();
 
-  // image detection noise
-  void inline addNoise(precision_t *ux, precision_t *uy) {
-    *ux += _d(_gen);
-    *uy += _d(_gen);
-  }
   std::mt19937 _gen;
   std::normal_distribution<> _d;
 
@@ -76,9 +68,6 @@ private:
   std::tuple<size_t, size_t> _header_3d_dynamic_landmarks;
   // number of executed steps / updates
   size_t _steps = 0;
-
-  // noise flag
-  bool _noise;
 
   const cameramodel::Imageplane _imageplane;
   const mat33_t _K_eigen;

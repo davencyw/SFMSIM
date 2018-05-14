@@ -10,13 +10,12 @@ namespace sfmsimulator::framesimulator {
 Framesimulator::Framesimulator(const std::string file_camera_poses,
                                const std::string file_3d_static_landmarks,
                                const std::string file_3d_dynamic_landmarks,
-                               const cameramodel::Cameramodel cameramodel,
-                               const bool noise)
+                               const cameramodel::Cameramodel cameramodel)
     : _file_camera_poses(file_camera_poses),
       _file_3d_static_landmarks(file_3d_static_landmarks),
       _file_3d_dynamic_landmarks(file_3d_dynamic_landmarks),
       _imageplane(cameramodel.getImageplane()),
-      _K_eigen(cameramodel.getK_eigen()), _noise(noise) {
+      _K_eigen(cameramodel.getK_eigen()) {
   _fstream_camera_poses = std::make_unique<std::ifstream>();
   _fstream_3d_dynamic_landmarks = std::make_unique<std::ifstream>();
 
@@ -69,14 +68,6 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
   };
   fstream_3d_static_landmarks.close();
-
-  if (_noise) {
-
-    std::cout << "Adding Noise to Image Detection!\n";
-    std::random_device rd{};
-    _gen = std::mt19937{rd()};
-    _d = std::normal_distribution<>{0.0, 0.5};
-  }
 };
 
 void Framesimulator::update3dScenePoints() {
@@ -167,10 +158,6 @@ void Framesimulator::step() {
     // get image coordinates and write
     precision_t x_image_coord_local = pt_h(0) / pt_h(2);
     precision_t y_image_coord_local = pt_h(1) / pt_h(2);
-
-    if (_noise) {
-      addNoise(&x_image_coord_local, &y_image_coord_local);
-    }
 
     // std::cout << point_vec4[0] << " : " << point_vec4[1] << " : "
     //           << point_vec4[2] << "\t||||\t" << x_image_coord_local << " : "

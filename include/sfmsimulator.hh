@@ -22,7 +22,7 @@ struct Sfmconfig {
   cameramodel::Cameramodel cameramodel;
 
   // reconstruction settings
-  size_t slidingwindowsize = 20;
+  size_t slidingwindow_size = 20;
   bool noise_image_detection = false;
   bool noise_camera = true;
   bool noise_3dposition = true;
@@ -51,9 +51,10 @@ public:
 
 private:
   void step();
+  void updateSlidingWindow();
   void output(const Sfmreconstruction &reconstruct) const;
-  void addNoise(std::shared_ptr<points::Points3d> points,
-                std::vector<vec6_t> cameraposes, precision_t amount);
+  void addNoise(std::shared_ptr<points::Points3d> points, vec6_t *cameraposes,
+                precision_t amount);
 
   // model configuration
   const Sfmconfig _config;
@@ -66,10 +67,11 @@ private:
 
   // scene window
   std::deque<std::shared_ptr<points::Points2d>> _scene_window_image;
-  std::deque<std::shared_ptr<points::Points3d>> _scene_window_world_estimate;
-  std::deque<std::shared_ptr<points::Points3d>> _scene_window_world;
-  std::deque<std::shared_ptr<mat44_t>> _scene_window_cameraposes_mat;
   std::deque<vec6_t> _scene_window_cameraposes;
+  std::shared_ptr<points::Points3d> _world_points;
+
+  // estimates
+  std::vector<std::vector<vec6_t>> _scene_full_camera_estimate;
 
   // simulation variables
   size_t _step = 0;
@@ -79,6 +81,7 @@ private:
   std::string _file_output = "";
   std::unique_ptr<std::ofstream> _fstream_output_weights;
   std::unique_ptr<std::ofstream> _fstream_output_camera_trajectory;
+  std::unique_ptr<std::ofstream> _fstream_output_camera_trajectory_groundtruth;
 };
 } // namespace sfmsimulator
 

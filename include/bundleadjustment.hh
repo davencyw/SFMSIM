@@ -114,8 +114,8 @@ Sfmreconstruction adjustBundle(
       //           << mutable_points3d[point_i][0] << " : "
       //           << mutable_points3d[point_i][1] << " : "
       //           << mutable_points3d[point_i][2] << "\tc: " << framecounter
-      //           << "\n";
-      // <<"\n"<< mutable_cameraposes[framecounter] << "\n";
+      //           << "\n"
+      //           << mutable_cameraposes[framecounter] << "\n";
 
       ceres::CostFunction *cost_function =
           SimpleReprojectionError::Create(uvx - cx, uvy - cy, weights(point_i));
@@ -141,7 +141,7 @@ Sfmreconstruction adjustBundle(
   options.logging_type = ceres::LoggingType::SILENT;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
-  // std::cout << summary.BriefReport() << "\n";
+  std::cout << summary.BriefReport() << "\n";
 
   ceres::Problem::EvaluateOptions evaloptions;
   evaloptions.residual_blocks = residual_block_ids;

@@ -25,7 +25,7 @@ int main(int argc, char const *argv[]) {
   // input files
 
   // std::string folder("../data/test_large0");
-  std::string testset("Tlarge3");
+  std::string testset("test_small");
   std::string folder("../data/" + testset);
   std::string camera_poses(folder + "/camera_poses.csv");
   std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
@@ -34,10 +34,14 @@ int main(int argc, char const *argv[]) {
   sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);
   config.type_pointclassifier = sfmsimulator::pointclassifier::
-      // Pointclassifier_type::PC_ReprojectionErrorDep1_t;
       Pointclassifier_type::PC_ReprojectionErrorNodep_t;
   config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks,
                       testset + "_nodep"};
+
+  config.camera_noise_amount = -1;
+  config.world_position_noise_amount = -1;
+  config.image_detection_noise_amount = -1;
+  config.slidingwindow_size = 3;
 
   sfmsimulator::Sfmsimulator sfmsim(config);
 

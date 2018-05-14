@@ -84,6 +84,10 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
                                                       "_camera_gt.csv");
 
   _weights = array_t::Ones(_framesimulator.getNumPoints());
+
+  // init rng
+  std::random_device rd{};
+  _rn_generator = std::mt19937{rd()};
 }
 
 void Sfmsimulator::updateSlidingWindow() {
@@ -103,7 +107,15 @@ void Sfmsimulator::updateSlidingWindow() {
   *_fstream_output_camera_trajectory_groundtruth << "\n";
 
   // handle noise
-  addNoise(_world_points, &(_scene_window_cameraposes.back()), 0.3);
+  if (_config.camera_noise_amount > 0) {
+    addCameraNoise();
+  }
+  if (_config.image_detection_noise_amount > 0) {
+    addImageDetectionNoise();
+  }
+  if (_config.world_position_noise_amount > 0) {
+    addWorldPositionNoise();
+  }
 
   if (_scene_window_image.size() > _config.slidingwindow_size) {
     _scene_window_image.pop_front();
@@ -112,7 +124,7 @@ void Sfmsimulator::updateSlidingWindow() {
 }
 
 void Sfmsimulator::run() {
-  const size_t steps(_framesimulator.updatesLeft());
+  const size_t steps(_framesimulator.updatesLeft() - 1);
   std::cout << "STEPS: " << steps << "\n\n\n";
 
   // initializationstep because we need atleast two frames to reconstruct
@@ -129,12 +141,9 @@ void Sfmsimulator::run() {
   }
 }
 
-// TODO(dave) add generic depending sliding window to pc_classifier
-// TODO(dave) separate initializationsteps (_steps=0,1) from this method
 void Sfmsimulator::step() {
   std::cout << " - STEP[ " << _step << " ]\n";
 
-  _framesimulator.step();
   updateSlidingWindow();
 
   // convert from deque to vector
@@ -177,35 +186,39 @@ void Sfmsimulator::step() {
   ++_step;
 }
 
-void Sfmsimulator::addNoise(std::shared_ptr<points::Points3d> points,
-                            vec6_t *cameraposes, precision_t amount) {
+void Sfmsimulator::addCameraNoise() {
 
-  //  add noise to worldpoints and camerapose
-  if (amount == 0) {
-    return;
+  vec6_t *camera_pose = &(_scene_window_cameraposes.back());
+
+  std::normal_distribution<> d{0, _config.camera_noise_amount};
+
+  for (size_t coeff_i(0); coeff_i < 6; ++coeff_i) {
+    const precision_t random(d(_rn_generator));
+    (*camera_pose)(coeff_i) += random;
   }
+}
+void Sfmsimulator::addImageDetectionNoise() {
 
-  std::random_device rd{};
-  std::mt19937 gen{rd()};
-  std::normal_distribution<> d{0, amount};
+  std::normal_distribution<> d{0, _config.image_detection_noise_amount};
+  auto image_points(_scene_window_image.back());
 
-  if (_config.noise_3dposition) {
-    const size_t numpoints(points->coord.size());
-    for (size_t point_i(0); point_i < numpoints; ++point_i) {
-      precision_t random(d(gen));
-      points->coord[0] += random;
-      random = d(gen);
-      points->coord[1] += random;
-      // no z noise for the boyz
-      // random = d(gen);
-      // points->coord[2] += random;
-    }
+  for (size_t point_i(0); point_i < _framesimulator.getNumPoints(); ++point_i) {
+    precision_t rand(d(_rn_generator));
+    image_points->coord[0] += rand;
+    rand = d(_rn_generator);
+    image_points->coord[1] += rand;
   }
-  if (_config.noise_camera) {
-    for (size_t param_i(0); param_i < 6; ++param_i) {
-      const precision_t random(d(gen));
-      (*cameraposes)(param_i) += random;
-    }
+}
+void Sfmsimulator::addWorldPositionNoise() {
+
+  std::normal_distribution<> d{0, _config.world_position_noise_amount};
+
+  for (size_t point_i(0); point_i < _framesimulator.getNumPoints(); ++point_i) {
+    precision_t rand(d(_rn_generator));
+    _world_points->coord[0] += rand;
+    rand = d(_rn_generator);
+    _world_points->coord[1] += rand;
+    // no noise in z-direction
   }
 }
 

@@ -23,9 +23,11 @@ struct Sfmconfig {
 
   // reconstruction settings
   size_t slidingwindow_size = 20;
-  bool noise_image_detection = false;
-  bool noise_camera = true;
-  bool noise_3dposition = true;
+
+  // noise parameter
+  precision_t camera_noise_amount = 0.3;
+  precision_t image_detection_noise_amount = -1;
+  precision_t world_position_noise_amount = 0.3;
 
   // 0 camera_poses
   // 1 static_3d_landmarks
@@ -46,14 +48,16 @@ public:
   ~Sfmsimulator() {
     _fstream_output_weights->close();
     _fstream_output_camera_trajectory->close();
+    _fstream_output_camera_trajectory_groundtruth->close();
     std::cout << "\n\n\n\n";
   }
 
 private:
   void step();
   void updateSlidingWindow();
-  void addNoise(std::shared_ptr<points::Points3d> points, vec6_t *cameraposes,
-                precision_t amount);
+  void addCameraNoise();
+  void addImageDetectionNoise();
+  void addWorldPositionNoise();
 
   // model configuration
   const Sfmconfig _config;
@@ -75,6 +79,9 @@ private:
   // simulation variables
   size_t _step = 0;
   bool _visualize = 0;
+
+  // noise parameter
+  std::mt19937 _rn_generator;
 
   // outputstream
   std::string _file_output = "";

@@ -41,7 +41,9 @@ struct PC_ReprojectionErrorNodep : public Pointclassifier {
 
   void classifynext(const Sfmreconstruction &reconstruct,
                     array_t &weights) const override {
+
     array_t new_weights = reconstruct.reprojection_error;
+    /*DEBUG*/ array_t residuals = reconstruct.reprojection_error;
 
     // set tolerance
     constexpr precision_t reproject_error_tolerance(0.01);

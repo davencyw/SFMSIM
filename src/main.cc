@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
 
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep1",
                                             "dep2", "dep3"};
-  std::vector<int> classifier_to_test{1, 4};
+  std::vector<int> classifier_to_test{1};
 
   sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);

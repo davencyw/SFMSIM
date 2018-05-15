@@ -137,6 +137,7 @@ Sfmreconstruction adjustBundle(
     problem.SetParameterization(mutable_cameraposes[0].data(),
                                 subset_parameterization);
   }
+
   if (skipped) {
     std::cout << "\nskipped " << skipped << " points\n";
   }
@@ -166,12 +167,12 @@ Sfmreconstruction adjustBundle(
   // collapse residuals
   size_t index(0);
   for (size_t error_i(0); error_i < numpoints; ++error_i) {
-    for (size_t error_j(0); error_j < 4; ++error_j) {
+    for (size_t error_j(0); error_j < numframes * 2; ++error_j) {
       const precision_t local_residual(eigen_residuals(index + error_j) /
                                        (weights(error_i) + 0.00000001));
       error(error_i) += local_residual * local_residual;
     }
-    index += 4;
+    index += numframes * 2;
   }
 
   reconstruct.reprojection_error = error;

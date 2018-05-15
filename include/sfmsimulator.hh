@@ -33,7 +33,7 @@ struct Sfmconfig {
   // 1 static_3d_landmarks
   // 2 dynamic_3d_landmarks
   // 3 output_filename
-  std::vector<std::string> filepaths;
+  std::array<std::string, 4> filepaths;
 };
 
 class Sfmsimulator {

@@ -12,6 +12,7 @@ inline void ExponentialWeighting(const precision_t reproject_error_tolerance,
                                  const precision_t reproject_error_max,
                                  const precision_t expweightdist,
                                  array_t &new_weights) {
+
   for (size_t i(0); i < new_weights.size(); ++i) {
     new_weights(i) = new_weights(i) == 0 ? reproject_error_max : new_weights(i);
     new_weights(i) =
@@ -20,8 +21,7 @@ inline void ExponentialWeighting(const precision_t reproject_error_tolerance,
                                                           : new_weights(i);
   }
 
-  precision_t max = reproject_error_max;
-  new_weights /= max;
+  new_weights /= reproject_error_max;
 
   for (size_t i(0); i < new_weights.size(); ++i) {
     new_weights(i) = std::pow(expweightdist, new_weights(i));
@@ -33,6 +33,13 @@ inline void ExponentialWeighting(const precision_t reproject_error_tolerance,
   }
 
   new_weights = 1.0 - (new_weights - 1.0) / (expweightdist - 1.0);
+
+  for (size_t i(0); i < new_weights.size(); ++i) {
+    if (new_weights(i) < 0) {
+      std::cout << new_weights(i) << "\n";
+      assert(false);
+    }
+  }
 }
 
 struct PC_ReprojectionErrorNodep : public Pointclassifier {
@@ -72,7 +79,15 @@ struct PC_ReprojectionErrorDep1 : public Pointclassifier {
 
     // dependency on old weights
     const array_t diff = new_weights - weights;
+    const array_t oldweights = weights;
     weights = weights * diff + new_weights; // dep1
+
+    for (size_t i(0); i < weights.size(); ++i) {
+      if (weights(i) < 0) {
+        std::cout << oldweights << "\n" << diff << "\n" << new_weights << "\n";
+        assert(false);
+      }
+    }
     const precision_t resultmax = weights.maxCoeff();
     weights /= resultmax;
   }

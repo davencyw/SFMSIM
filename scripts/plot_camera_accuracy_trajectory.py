@@ -21,7 +21,7 @@ seaborn.set_style("darkgrid")
 files = []
 
 for file in os.listdir(filepath):
-    if fnmatch.fnmatch(file, '*camera.csv') and fnmatch.fnmatch(file, '*' + set +'*' ):
+    if fnmatch.fnmatch(file, '*camera.csv') and fnmatch.fnmatch(file, set +'*' ):
         files.append(file)
 files = sorted(files)
 

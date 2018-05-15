@@ -202,25 +202,10 @@ Sfmreconstruction adjustBundle(
 
   reconstruct.point3d_estimate = world_estimate;
 
-  for (auto &camerapose_i : mutable_cameraposes) {
-    std::shared_ptr<mat44_t> pose = std::make_shared<mat44_t>(mat44_t());
-    precision_t rotationmat[9] = {0};
-    ceres::AngleAxisToRotationMatrix(camerapose_i.data(), rotationmat);
+  reconstruct.camerapose_estimate.insert(
+      std::end(reconstruct.camerapose_estimate),
+      std::begin(mutable_cameraposes), std::end(mutable_cameraposes));
 
-    for (int r(0); r < 3; r++) {
-      for (int c(0); c < 3; c++) {
-        (*pose)(c, r) = rotationmat[r * 3 + c]; //`rotationMat` is
-                                                //      col-major...
-      }
-    }
-    // translation
-    (*pose)(0, 3) = camerapose_i[3];
-    (*pose)(1, 3) = camerapose_i[4];
-    (*pose)(2, 3) = camerapose_i[5];
-
-    reconstruct.camerapose_estimate_mat.push_back(pose);
-    reconstruct.camerapose_estimate.push_back(camerapose_i);
-  }
   return reconstruct;
 }
 

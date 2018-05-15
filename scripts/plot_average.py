@@ -7,13 +7,14 @@ import os
 import fnmatch
 
 
-set = sys.argv[1]
-numdyn = int(sys.argv[2])
+setting = sys.argv[1]
+set = sys.argv[2]
+numdyn = int(sys.argv[3])
 
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/noise_0_3"
+filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"+setting+"/"
 
 for file in os.listdir(filepath):
-    if fnmatch.fnmatch(file, '*weights.csv') and fnmatch.fnmatch(file, set +'*' ):
+    if fnmatch.fnmatch(file, '*weights.csv') and fnmatch.fnmatch(file, set+'*'):
 
         split = file.split("_")
         dep = split[1]
@@ -37,8 +38,8 @@ for file in os.listdir(filepath):
         x = range(1,numframes+2)
 
         for col in array.T:
-            locaveragedyn = np.sum(np.abs(col[0:numdyn])) / numdyn
-            locaveragestat = np.sum(np.abs(col[numdyn:-1])) / (length-numdyn)
+            locaveragedyn = np.sum((col[0:numdyn])) / numdyn
+            locaveragestat = np.sum((col[numdyn:-1])) / (length-numdyn)
             dynamicweightaverage.append(locaveragedyn)
             staticweightaverage.append(locaveragestat)
 
@@ -50,6 +51,8 @@ for file in os.listdir(filepath):
         title = set+ "_"+ dep +"_average"
         plt.title(title)
         plt.ylim(-0.1,1.1)
+        plt.xlim(2,numframes+1)
+        plt.xticks(range(2,numframes+1,int(numframes/10)))
         plt.xlabel("frame")
         plt.ylabel("weight")
         plt.legend(loc="lower right")

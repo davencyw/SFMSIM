@@ -14,7 +14,7 @@
 namespace sfmsimulator::framesimulator {
 class Framesimulator {
 public:
-  Framesimulator(const std::vector<std::string> filepaths,
+  Framesimulator(const std::array<std::string, 4> filepaths,
                  const cameramodel::Cameramodel cameramodel)
       : Framesimulator(filepaths[0], filepaths[1], filepaths[2], cameramodel) {}
 

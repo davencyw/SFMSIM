@@ -3,32 +3,40 @@ import pandas as pd
 import seaborn
 import numpy as np
 import sys
+import os
+import fnmatch
 
-file = sys.argv[1]
+setting = sys.argv[1]
 
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim//results/"
+filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"+setting+"/"
 
-df = pd.read_csv(filepath + file + ".csv", delimiter=",", header=None)
-df = df.transpose()
-#df = df.rename({0: "f1", 1: "f2", 2: "f3"}, axis="columns");
+for file in os.listdir(filepath):
+    if fnmatch.fnmatch(file, '*weights.csv'):
+        names = file.split("_")
 
-df.index += 1
+        set = names[0]
+        classifier = names[1]
+        df = pd.read_csv(filepath + file , delimiter=",", header=None)
+        df = df.transpose()
+        #df = df.rename({0: "f1", 1: "f2", 2: "f3"}, axis="columns");
 
-seaborn.set(context="talk")
-seaborn.set_style("darkgrid")
+        df.index += 1
 
-labeltext = "frame "
-counter = 0
+        seaborn.set(context="talk")
+        seaborn.set_style("darkgrid")
 
-for column in df:
-    counter += 1
-    currentlabeltext = labeltext + str(counter)
-    plt.plot(df[column], label=currentlabeltext, marker='o', linestyle='None')
+        labeltext = "frame "
+        counter = 0
 
-plt.title(file)
-plt.ylim(0,1.1)
-plt.xlabel("point_i")
-plt.ylabel("weight")
-plt.legend(loc="lower right")
-plt.savefig(file,dpi=300)
-plt.show()
+        for column in df:
+            counter += 1
+            currentlabeltext = labeltext + str(counter)
+            plt.plot(df[column], label=currentlabeltext, marker='o', linestyle='None')
+
+        plt.title(set + "_"+"_weights")
+        plt.ylim(0,1.1)
+        plt.xlabel("point_i")
+        plt.ylabel("weight")
+        plt.legend(loc="lower right")
+        plt.savefig(file,dpi=300)
+        plt.show()

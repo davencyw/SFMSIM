@@ -33,9 +33,8 @@ int main(int argc, char const *argv[]) {
   std::string static_landmarks(folder + "/landmark_static_3d.csv");
 
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep1",
-                                            "dep2"};
-  std::vector<int> classifier_to_test{2};
-  // std::vector<int> classifier_to_test{0, 1, 2, 3};
+                                            "dep2", "dep3"};
+  std::vector<int> classifier_to_test{1, 4};
 
   sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
   sfmsimulator::Sfmconfig config(camera);
@@ -48,6 +47,7 @@ int main(int argc, char const *argv[]) {
   config.image_detection_noise_amount = -1;
   config.slidingwindow_size = 30;
 
+  // iterate over classifiers
   for (int classifier_i : classifier_to_test) {
     config.filepaths[3] =
         outputfolder + testset + "_" + classifier_names[classifier_i];

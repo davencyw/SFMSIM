@@ -23,7 +23,8 @@ enum Pointclassifier_type {
   PC_Noclassifier_t,
   PC_ReprojectionErrorNodep_t,
   PC_ReprojectionErrorDep1_t,
-  PC_ReprojectionErrorDep2_t
+  PC_ReprojectionErrorDep2_t,
+  PC_ReprojectionErrorDep3_t,
 };
 
 // TODO(dave): create class for clustering!

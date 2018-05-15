@@ -44,15 +44,10 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
   using pct = pointclassifier::Pointclassifier_type;
 
   switch (config.type_pointclassifier) {
-  case pct::PC_ReprojectionErrorDep1_t:
+  case pct::PC_ReprojectionErrorDep3_t:
     _pointclassifier =
-        std::make_unique<pointclassifier::PC_ReprojectionErrorDep1>(
-            pointclassifier::PC_ReprojectionErrorDep1());
-    break;
-  case pct::PC_ReprojectionErrorDep2_t:
-    _pointclassifier =
-        std::make_unique<pointclassifier::PC_ReprojectionErrorDep2>(
-            pointclassifier::PC_ReprojectionErrorDep2());
+        std::make_unique<pointclassifier::PC_ReprojectionErrorDep3>(
+            pointclassifier::PC_ReprojectionErrorDep3());
     break;
   case pct::PC_ReprojectionErrorNodep_t:
     _pointclassifier =

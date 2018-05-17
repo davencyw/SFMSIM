@@ -26,10 +26,11 @@ int main(int argc, char const *argv[]) {
 
   std::vector<std::string> testsets{"Tlarge4"};
   // std::vector<std::string> testsets{"Tlarge1", "Tlarge2", "Tlarge3"};
+
   for (std::string testset : testsets) {
 
     std::string folder("../data/" + testset);
-    std::string outputfolder("../results/s7_4t4/");
+    std::string outputfolder("../results/s8/");
     std::string camera_poses(folder + "/camera_poses.csv");
     std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
     std::string static_landmarks(folder + "/landmark_static_3d.csv");
@@ -44,8 +45,8 @@ int main(int argc, char const *argv[]) {
         Pointclassifier_type::PC_ReprojectionErrorNodep_t;
     config.filepaths = {camera_poses, static_landmarks, dynamic_landmarks};
 
-    config.image_detection_noise_amount = 0.1;
-    config.camera_noise_amount = 0.1;
+    config.image_detection_noise_amount = -1;
+    config.camera_noise_amount = 0.3;
     config.world_position_noise_amount = 0.3;
     config.slidingwindow_size = 30;
 

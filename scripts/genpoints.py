@@ -7,6 +7,7 @@ dynamicfile = "landmark_dynamic_3d.csv"
 
 imageplaneheight = 480
 imageplanewidth  = 620
+focal = 500
 
 folder = sys.argv[1]
 numstatic = int(sys.argv[2])
@@ -15,23 +16,42 @@ numframes = int(sys.argv[4])
 
 filestatic  = folder + "/landmark_static_3d.csv"
 filedynamic = folder + "/landmark_dynamic_3d.csv"
+filecamera = folder + "/camera_poses.csv"
 
 print "\nfolder                   : " + folder
 print "number of static points  : " + str(numstatic)
 print "number of dynamic points : " + str(numdynamic)
 print "number of frames         : " + str(numframes) + "\n\n"
 
-dynamic  = np.empty((numdynamic,0))
+dynamic_image  = np.empty((numdynamic,0))
 diff     = np.empty((numdynamic,0))
-static   = np.empty((numstatic,0))
+static_image   = np.empty((numstatic,0))
 
-minmax = [[-imageplanewidth/2, imageplanewidth/2],[-imageplaneheight/2, imageplaneheight/2],[1,2]]
+max = [imageplanewidth*0.85, imageplaneheight*0.85]
+for dim in range(0,2) :
+    staticloc_image = np.random.uniform(low=0, high=max[dim], size=(numstatic,1))
+    static_image = np.append(static_image, staticloc_image, axis=1)
+    dynamicloc_image = np.random.uniform(low=0, high=max[dim], size=(numdynamic,1))
+    dynamic_image = np.append(dynamic_image, dynamicloc_image, axis=1)
 
-for dim in range(0,3) :
-    staticloc = np.random.uniform(low=minmax[dim][0], high=minmax[dim][1], size=(numstatic,1))
-    static = np.append(static, staticloc, axis=1)
-    dynamicloc = np.random.uniform(low=minmax[dim][0], high=minmax[dim][1], size=(numdynamic,1))
-    dynamic = np.append(dynamic, dynamicloc, axis=1)
+#project back onto 3d space by defining z-coordinate
+staticz = np.random.uniform(low=1,high=7, size=(numstatic))
+dynamicz = np.random.uniform(low=1,high=7, size=(numdynamic))
+
+staticx = static_image[:,0] / focal
+staticx = staticx * staticz
+staticy = static_image[:,1] / focal
+staticy = staticy * staticz
+
+dynamicx = dynamic_image[:,0] / focal
+dynamicx = dynamicx * dynamicz
+dynamicy = dynamic_image[:,1] / focal
+dynamicy = dynamicy * dynamicz
+
+static = np.column_stack((staticx,staticy,staticz))
+dynamic = np.column_stack((dynamicx,dynamicy,dynamicz))
+
+
 
 dynamicframe = dynamic
 for frame in range(0,numframes-1):
@@ -42,8 +62,16 @@ for frame in range(0,numframes-1):
     dynamic = np.append(dynamic,dynamicframe,axis=0)
 
 
+sinx = np.linspace(0,np.pi,numframes)
+camerasiny = np.sin(sinx)
+cameray = camerasiny * 5
+camerax = np.linspace(-5,5,numframes)
+
+camera = np.column_stack((camerax,cameray))
+
 np.savetxt(filestatic, static, delimiter=" ",fmt='%f')
 np.savetxt(filedynamic, dynamic, delimiter=" ",fmt='%f')
+np.savetxt(filecamera, camera, delimiter=" ", fmt='%f')
 
 firstlinestatic = str(numstatic)
 with open(filestatic, 'r') as original: data = original.read()
@@ -53,7 +81,12 @@ firstlinedynamic = str(numframes) + " " + str(numdynamic)
 with open(filedynamic, 'r') as original: data = original.read()
 with open(filedynamic, 'w') as modified: modified.write(firstlinedynamic + "\n" + data)
 
+firstlinecamera = str(numframes)
+with open(filecamera, 'r') as original: data = original.read()
+with open(filecamera, 'w') as modified: modified.write(firstlinecamera + "\n" + data)
+
 print "files generated: "
 print "\t\t\t"+filestatic
 print "\t\t\t"+filedynamic
+print "\t\t\t"+filecamera
 print "finished...\n\n"

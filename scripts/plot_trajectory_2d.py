@@ -10,6 +10,8 @@ import os
 import fnmatch
 from scipy.spatial import distance
 
+seaborn.set(context="talk")
+seaborn.set_style("darkgrid")
 
 setpath = sys.argv[1]
 set = sys.argv[2]

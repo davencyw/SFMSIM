@@ -16,11 +16,12 @@ namespace sfmsimulator::bundleadjustment {
 
 struct SimpleReprojectionError {
   SimpleReprojectionError(precision_t observed_x, precision_t observed_y,
-                          precision_t weight)
-      : observed_x(observed_x), observed_y(observed_y), weight(weight) {}
+                          precision_t weight, precision_t focal)
+      : observed_x(observed_x), observed_y(observed_y), weight(weight),
+        focal(focal) {}
   template <typename T>
   bool operator()(const T *const camera, const T *const point,
-                  const T *const focal, T *residuals) const {
+                  T *residuals) const {
     T p[3];
     T angleaxis[3];
     T eulerangles[3];
@@ -45,8 +46,8 @@ struct SimpleReprojectionError {
     const T yp = p[1] / p[2];
 
     // Compute final projected point position.
-    const T predicted_x = *focal * xp;
-    const T predicted_y = *focal * yp;
+    const T predicted_x = T(focal) * xp;
+    const T predicted_y = T(focal) * yp;
 
     // The error is the difference between the predicted and observed position.
     residuals[0] = (predicted_x - T(observed_x)) * T(weight);
@@ -57,14 +58,15 @@ struct SimpleReprojectionError {
   // the client code.
   static ceres::CostFunction *Create(const precision_t observed_x,
                                      const precision_t observed_y,
-                                     const precision_t weight) {
-    return (
-        new ceres::AutoDiffCostFunction<SimpleReprojectionError, 2, 6, 3, 1>(
-            new SimpleReprojectionError(observed_x, observed_y, weight)));
+                                     const precision_t weight,
+                                     const precision_t focal) {
+    return (new ceres::AutoDiffCostFunction<SimpleReprojectionError, 2, 6, 3>(
+        new SimpleReprojectionError(observed_x, observed_y, weight, focal)));
   }
   precision_t observed_x;
   precision_t observed_y;
   precision_t weight;
+  precision_t focal;
 };
 
 Sfmreconstruction adjustBundle(
@@ -118,12 +120,12 @@ Sfmreconstruction adjustBundle(
       //           << "\n"
       //           << mutable_cameraposes[framecounter] << "\n";
 
-      ceres::CostFunction *cost_function =
-          SimpleReprojectionError::Create(uvx - cx, uvy - cy, weights(point_i));
+      ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
+          uvx - cx, uvy - cy, weights(point_i), focal);
 
       ceres::ResidualBlockId blockid = problem.AddResidualBlock(
           cost_function, nullptr, mutable_cameraposes[framecounter].data(),
-          mutable_points3d[point_i].data(), &focal);
+          mutable_points3d[point_i].data());
       residual_block_ids.push_back(blockid);
       ++framecounter;
     }

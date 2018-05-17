@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
     std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
     std::string static_landmarks(folder + "/landmark_static_3d.csv");
 
-    sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
+    sfmsimulator::cameramodel::Cameramodel camera(100.0, 620, 480);
     sfmsimulator::Sfmconfig config(camera);
     config.type_pointclassifier = sfmsimulator::pointclassifier::
         Pointclassifier_type::PC_ReprojectionErrorNodep_t;

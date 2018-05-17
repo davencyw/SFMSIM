@@ -7,6 +7,7 @@ import seaborn
 import numpy as np
 import os
 import fnmatch
+from scipy.spatial import distance
 
 filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"
 
@@ -47,6 +48,18 @@ for file in files:
     camera = camera[1:][:]
     cameraerror = []
 
+    camera_gt_x = camera_gt[:,3]
+    camera_gt_y = camera_gt[:,4]
+    camera_gt_z = camera_gt[:,5]
+
+
+    #translate to origin (also used for scaling)
+    camera[:,3] -= camera_gt[0,3]
+    camera[:,4] -= camera_gt[0,4]
+    camera_gt[:,3] -= camera_gt[0,3]
+    camera_gt[:,4] -= camera_gt[0,4]
+
+
     currentslidingwindowsize = 2
     camerastart = 0
     camera_gtstart = 0
@@ -58,12 +71,32 @@ for file in files:
         camerarange =  range(camerastart, camerastart + currentslidingwindowsize)
         camera_gtrange = range(camera_gtstart, camera_gtstart + currentslidingwindowsize)
 
+        localcam = camera[camerarange,0:6]
+        localgtcam = camera_gt[camera_gtrange,0:6]
+
+        ###scale
+        averagescale=0
+        #loop over every pair and average scaling
+        numpairs = currentslidingwindowsize -1
+        for pair_i in range(0,numpairs):
+            pt1gt = (localgtcam[pair_i,3],localgtcam[pair_i,4])
+            pt2gt = (localgtcam[pair_i+1,3],localgtcam[pair_i+1,4])
+            pt1 = (localcam[pair_i,3],localcam[pair_i,4])
+            pt2 = (localcam[pair_i+1,3],localcam[pair_i+1,4])
+
+            gtdist = distance.euclidean(pt1gt,pt2gt)
+            dist = distance.euclidean(pt1,pt2)
+            localscale = dist / gtdist
+            averagescale += localscale
+
+        averagescale /= float(numpairs)
+        localcam /= averagescale
+        ###end scale
 
         for position_i in range(0, currentslidingwindowsize):
-            positionerror = 0
-            for i in range(0,6):
-                 coefferror = camera[camerarange[position_i]][i] - camera_gt[camera_gtrange[position_i]][i]
-                 positionerror += coefferror * coefferror
+            positionerror = distance.euclidean(localcam[position_i],localgtcam[position_i])
+            positionerror = (positionerror * positionerror)/3.0
+            frameerror += positionerror
             positionerror /= 3
             frameerror += positionerror
 
@@ -85,10 +118,10 @@ for file in files:
     label = dep + " RMSE"
     plt.plot(x,cameraerror,label=label)
 
-
 title = set+"_cameratrajectory_error"
 plt.title(title)
 plt.xlim(2,numframes+1)
+# plt.ylim(0,5)
 plt.xticks(range(2,numframes+2,int((numframes+1)/10)))
 plt.xlabel("frame")
 plt.ylabel("error")

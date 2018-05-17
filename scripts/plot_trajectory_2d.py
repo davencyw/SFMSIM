@@ -10,9 +10,12 @@ import os
 import fnmatch
 from scipy.spatial import distance
 
-set = "Tlarge5"
+
+setpath = sys.argv[1]
+set = sys.argv[2]
+
 classifiers = ["noclassifier","nodep","dep3"]
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/s9/"
+filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"+setpath
 
 for classifier in classifiers:
 
@@ -81,8 +84,6 @@ for classifier in classifiers:
         localcam /= averagescale
         ###end scale
 
-        print localcam
-
         ax.plot(localcam[:,0],localcam[:,1], '-o',label="trajectory at frame " + str(frame_i+2))
         camerastart += currentslidingwindowsize
         if currentslidingwindowsize < slidingwindowsize:
@@ -99,10 +100,13 @@ for classifier in classifiers:
         plt.xlim(xmin-1,xmax+1)
         plt.ylim(ymin-1,ymax+1)
 
+    title=set + "_"+classifier+"_camera_trajectory"
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     mng = plt.get_current_fig_manager()
     mng.resize(*mng.window.maxsize())
-    plt.title(set + "_"+classifier+"_camera_trajectory")
+    plt.title(title)
+    plt.savefig(title,dpi=300)
     plt.show()
+    print "saved in: "+title

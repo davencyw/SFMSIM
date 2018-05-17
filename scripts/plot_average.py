@@ -48,7 +48,7 @@ for file in os.listdir(filepath):
         label = "average weights of static points"
         plt.plot(x,staticweightaverage,label=label)
 
-        title = set+ "_"+ dep +"_average"
+        title = set+ "_"+ dep +"_average_weights"
         plt.title(title)
         plt.ylim(-0.1,1.1)
         plt.xlim(2,numframes+1)

@@ -169,6 +169,7 @@ void Framesimulator::step() {
     // TODO(dave): work with projected.coord pointer instead of bracket ops
     bool is_in_image(geometry::isInside2dPolygon(
         x_image_coord_local, y_image_coord_local, image_height, image_width));
+
     if (is_in_image) {
       projected.coord[0](point_i) = x_image_coord_local;
       projected.coord[1](point_i) = y_image_coord_local;

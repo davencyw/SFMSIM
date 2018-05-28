@@ -26,19 +26,19 @@ int main(int argc, char const *argv[]) {
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep1",
                                             "dep2", "dep3"};
 
-  std::vector<std::string> testsets{"Tlarge5"};
+  std::vector<std::string> testsets{"Tlarge6", "Tlarge7"};
   std::vector<int> classifier_to_test{0, 1, 4};
   // std::vector<std::string> testsets{"Tlarge1", "Tlarge2", "Tlarge3"};
 
   for (std::string testset : testsets) {
 
     std::string folder("../data/" + testset);
-    std::string outputfolder("../results/s9/");
+    std::string outputfolder("../results/s10/");
     std::string camera_poses(folder + "/camera_poses.csv");
     std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
     std::string static_landmarks(folder + "/landmark_static_3d.csv");
 
-    sfmsimulator::cameramodel::Cameramodel camera(100.0, 620, 480);
+    sfmsimulator::cameramodel::Cameramodel camera(1.0, 620, 480);
     sfmsimulator::Sfmconfig config(camera);
     config.type_pointclassifier = sfmsimulator::pointclassifier::
         Pointclassifier_type::PC_ReprojectionErrorNodep_t;
@@ -47,7 +47,7 @@ int main(int argc, char const *argv[]) {
     config.image_detection_noise_amount = 0.005;
     config.camera_noise_amount = 0.3;
     config.world_position_noise_amount = 0.3;
-    config.slidingwindow_size = 30;
+    config.slidingwindow_size = 50;
 
     // iterate over classifiers
     for (int classifier_i : classifier_to_test) {

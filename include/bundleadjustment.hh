@@ -173,15 +173,13 @@ Sfmreconstruction adjustBundle(
     for (size_t frame_i(0); frame_i < numframes; ++frame_i) {
       // if point visible in frame then there is a residual
       if (points_frames[frame_i]->visible[point_i]) {
-        const precision_t local_residual_0(eigen_residuals(index + frame_i) /
+        const precision_t local_residual_0(eigen_residuals(index++) /
                                            (weights(point_i) + 0.00000001));
-        const precision_t local_residual_1(
-            eigen_residuals(index + frame_i + 1) /
-            (weights(point_i) + 0.00000001));
+        const precision_t local_residual_1(eigen_residuals(index++) /
+                                           (weights(point_i) + 0.00000001));
 
         error(point_i) += local_residual_0 * local_residual_0 +
                           local_residual_1 * local_residual_1;
-        index += 2;
       }
     }
   }

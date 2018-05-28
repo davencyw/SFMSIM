@@ -52,19 +52,22 @@ dynamicy = dynamicy * dynamicz
 static = np.column_stack((staticx,staticy,staticz))
 dynamic = np.column_stack((dynamicx,dynamicy,dynamicz))
 
-
+dynpointsstaticstart = int(numframes * 0.25)-1
+dynpointsstaticstop  = int(numframes * 0.75)-1
 
 dynamicframe = dynamic
 for frame in range(0,numframes-1):
     diffxy = np.random.uniform(low=-2, high=2, size=(numdynamic,2))
     diffz = np.random.uniform(low=-0.1, high=0.2, size=(numdynamic,1))
     diff = np.append(diffxy, diffz, axis=1)
+    if frame > dynpointsstaticstart and frame < dynpointsstaticstop :
+        diff.fill(0.0)
     dynamicframe = dynamicframe + diff
     dynamic = np.append(dynamic,dynamicframe,axis=0)
 
 
 camerarotation = np.zeros(numframes)
-sinx = np.linspace(0,np.pi,numframes)
+sinx = np.linspace(0,np.pi*6,numframes)
 camerasiny = np.sin(sinx)
 cameray = camerasiny * 5
 camerax = np.linspace(-5,5,numframes)

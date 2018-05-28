@@ -95,17 +95,15 @@ for classifier in classifiers:
             currentslidingwindowsize += 1
         else:
             camerastart_gt += 1
+        xtot = np.concatenate([localcam[:,0],camera_gt_x, [xmin,xmax]]);
+        ytot = np.concatenate([localcam[:,1],camera_gt_y, [ymin,ymax]]);
+        xmin = np.min(xtot)
+        xmax = np.max(xtot)
+        ymin = np.min(ytot)
+        ymax = np.max(ytot)
+        plt.xlim(xmin-1,xmax+1)
+        plt.ylim(ymin-1,ymax+1)
 
-        # xtot = np.concatenate([localcam[:,0],camera_gt_x, [xmin,xmax]]);
-        # ytot = np.concatenate([localcam[:,1],camera_gt_y, [ymin,ymax]]);
-        # xmin = np.min(xtot)
-        # xmax = np.max(xtot)
-        # ymin = np.min(ytot)
-        # ymax = np.max(ytot)
-        xmax = [-1,11]
-        ymax = [-1,5]
-        plt.xlim(xmax)
-        plt.ylim(ymax)
         title=set + "_"+classifier+"_camera_trajectory"
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=2)

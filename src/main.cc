@@ -12,9 +12,9 @@ int main(int argc, char const *argv[]) {
   // TODO(dave): add boost program options to properly parse the input
 
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep3"};
-  std::vector<std::string> testsets{"Tlarge6", "Tlarge7"};
-  std::string outputfolder("../results/s10/");
-  std::vector<int> classifier_to_test{2};
+  std::vector<std::string> testsets{"Tlarge11"};
+  std::string outputfolder("../results/s11/");
+  std::vector<int> classifier_to_test{0, 1, 2};
 
   for (std::string testset : testsets) {
 

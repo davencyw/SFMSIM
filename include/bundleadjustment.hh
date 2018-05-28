@@ -120,7 +120,7 @@ Sfmreconstruction adjustBundle(
       //           << mutable_points3d[point_i][1] << " : "
       //           << mutable_points3d[point_i][2] << "\tc: " << framecounter
       //           << "\n"
-      //           << mutable_cameraposes[framecounter] << "\n";
+      //           << mutable_cameraposes[framecounter] << "\n\n";
 
       ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
           uvx - cx, uvy - cy, weights(point_i), focal);

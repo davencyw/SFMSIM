@@ -35,7 +35,8 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
         std::get<0>(_header_3d_dynamic_landmarks) >>
         std::get<1>(_header_3d_dynamic_landmarks);
   } else {
-    std::cout << "\n\nF A I L E D  READING DYNAMIC_LANDMARKS!\n\n\n";
+    std::cout << "\n\nF A I L E D  READING DYNAMIC_LANDMARKS!\n"
+              << _file_3d_dynamic_landmarks << "\n\n";
   };
 
   // start opening static landmark poses file
@@ -65,7 +66,8 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     }
 
   } else {
-    std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
+    std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n"
+              << _file_3d_static_landmarks << "\n\n";
   };
   fstream_3d_static_landmarks.close();
 };

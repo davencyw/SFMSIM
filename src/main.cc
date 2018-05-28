@@ -23,17 +23,16 @@
 int main(int argc, char const *argv[]) {
   // TODO(dave): add boost program options to properly parse the input
   // input files
-  std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep1",
-                                            "dep2", "dep3"};
+  std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep3"};
 
-  std::vector<std::string> testsets{"Tlarge6", "Tlarge7"};
-  std::vector<int> classifier_to_test{0, 1, 4};
-  // std::vector<std::string> testsets{"Tlarge1", "Tlarge2", "Tlarge3"};
+  // std::vector<std::string> testsets{"Tlarge6", "Tlarge7"};
+  // std::string outputfolder("../results/s10/");
+  // std::vector<int> classifier_to_test{0, 1, 2};
+  std::vector<int> classifier_to_test{2};
 
   for (std::string testset : testsets) {
 
     std::string folder("../data/" + testset);
-    std::string outputfolder("../results/s10/");
     std::string camera_poses(folder + "/camera_poses.csv");
     std::string dynamic_landmarks(folder + "/landmark_dynamic_3d.csv");
     std::string static_landmarks(folder + "/landmark_static_3d.csv");

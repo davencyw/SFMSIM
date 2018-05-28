@@ -7,6 +7,7 @@
 #include "points.hh"
 #include "sfmsimulator.hh"
 
+#include <algorithm>
 #include <iostream>
 
 #include <ceres/ceres.h>
@@ -164,13 +165,16 @@ Sfmreconstruction adjustBundle(
   array_t eigen_residuals =
       Eigen::Map<array_t>(residuals.data(), residuals.size());
   array_t error = array_t::Zero(numpoints);
+  array_t visible_in_num_frames = array_t::Ones(numpoints);
 
   // collapse residuals
   size_t index(0);
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
+    size_t visible_in_num_frames_local(0);
     for (size_t frame_i(0); frame_i < numframes; ++frame_i) {
       // if point visible in frame then there is a residual
       if (points_frames[frame_i]->visible[point_i]) {
+        visible_in_num_frames_local++;
         const precision_t local_residual_0(eigen_residuals(index++) /
                                            (weights(point_i) + 0.00000001));
         const precision_t local_residual_1(eigen_residuals(index++) /
@@ -180,8 +184,12 @@ Sfmreconstruction adjustBundle(
                           local_residual_1 * local_residual_1;
       }
     }
+
+    visible_in_num_frames[point_i] = std::clamp(
+        visible_in_num_frames_local, static_cast<size_t>(1), numframes);
   }
 
+  error = error.cwiseQuotient(visible_in_num_frames);
   reconstruct.reprojection_error = error;
 
   if (not(summary.termination_type == ceres::CONVERGENCE)) {

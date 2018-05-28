@@ -10,8 +10,8 @@ import os
 import fnmatch
 from scipy.spatial import distance
 
-seaborn.set(context="talk")
-seaborn.set_style("darkgrid")
+# seaborn.set(context="talk")
+# seaborn.set_style("darkgrid")
 
 setpath = sys.argv[1]
 set = sys.argv[2]
@@ -86,7 +86,7 @@ for classifier in classifiers:
         localcam /= averagescale
         ###end scale
 
-        ax.plot(localcam[:,0],localcam[:,1], '-o',label="trajectory at frame " + str(frame_i+2))
+        ax.plot(localcam[:,0],localcam[:,1], '-o', color=(0.40625,0.40625,0.40625))
         camerastart += currentslidingwindowsize
         if currentslidingwindowsize < slidingwindowsize:
             currentslidingwindowsize += 1
@@ -103,9 +103,9 @@ for classifier in classifiers:
         plt.ylim(ymin-1,ymax+1)
 
     title=set + "_"+classifier+"_camera_trajectory"
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    # box = ax.get_position()
+    # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     mng = plt.get_current_fig_manager()
     mng.resize(*mng.window.maxsize())
     plt.title(title)

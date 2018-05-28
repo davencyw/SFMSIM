@@ -125,7 +125,7 @@ plt.xlim(2,numframes+1)
 plt.xticks(range(2,numframes+2,int((numframes+1)/10)))
 plt.xlabel("frame")
 plt.ylabel("error")
-plt.legend(loc="upper right")
+plt.legend(loc="upper left")
 plt.savefig(title,dpi=300)
 plt.show()
 

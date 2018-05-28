@@ -7,6 +7,7 @@
 #include "points.hh"
 #include "sfmsimulator.hh"
 
+#include <algorithm>
 #include <iostream>
 
 #include <ceres/ceres.h>
@@ -97,6 +98,7 @@ Sfmreconstruction adjustBundle(
 
   size_t skipped(0);
 
+  // TODO(dave): change loop order
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     mutable_points3d[point_i] =
         vec3_t((*coord_world)[0](point_i), (*coord_world)[1](point_i),
@@ -105,20 +107,20 @@ Sfmreconstruction adjustBundle(
     size_t framecounter(0);
     for (auto &points_frame_i : points_frames) {
 
-      const precision_t uvx(points_frame_i->coord[0](point_i));
-      const precision_t uvy(points_frame_i->coord[1](point_i));
-
-      if (uvx < 0 && uvy < 0) {
+      if (!(points_frame_i->visible[point_i])) {
         ++skipped;
         continue;
       }
+      const precision_t uvx(points_frame_i->coord[0](point_i));
+      const precision_t uvy(points_frame_i->coord[1](point_i));
+
       // std::cout << "RBLOCK:\n"
       //           << uvx << " : " << uvy << "\t||||\t"
       //           << mutable_points3d[point_i][0] << " : "
       //           << mutable_points3d[point_i][1] << " : "
       //           << mutable_points3d[point_i][2] << "\tc: " << framecounter
       //           << "\n"
-      //           << mutable_cameraposes[framecounter] << "\n";
+      //           << mutable_cameraposes[framecounter] << "\n\n";
 
       ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
           uvx - cx, uvy - cy, weights(point_i), focal);
@@ -148,8 +150,6 @@ Sfmreconstruction adjustBundle(
   options.linear_solver_type = ceres::ITERATIVE_SCHUR;
   options.minimizer_progress_to_stdout = true;
   options.max_num_iterations = 1024;
-  // options.eta = 1e-2;
-  // options.max_solver_time_in_seconds = 10;
   options.logging_type = ceres::LoggingType::SILENT;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
@@ -165,18 +165,31 @@ Sfmreconstruction adjustBundle(
   array_t eigen_residuals =
       Eigen::Map<array_t>(residuals.data(), residuals.size());
   array_t error = array_t::Zero(numpoints);
+  array_t visible_in_num_frames = array_t::Ones(numpoints);
 
   // collapse residuals
   size_t index(0);
-  for (size_t error_i(0); error_i < numpoints; ++error_i) {
-    for (size_t error_j(0); error_j < numframes * 2; ++error_j) {
-      const precision_t local_residual(eigen_residuals(index + error_j) /
-                                       (weights(error_i) + 0.00000001));
-      error(error_i) += local_residual * local_residual;
+  for (size_t point_i(0); point_i < numpoints; ++point_i) {
+    size_t visible_in_num_frames_local(0);
+    for (size_t frame_i(0); frame_i < numframes; ++frame_i) {
+      // if point visible in frame then there is a residual
+      if (points_frames[frame_i]->visible[point_i]) {
+        visible_in_num_frames_local++;
+        const precision_t local_residual_0(eigen_residuals(index++) /
+                                           (weights(point_i) + 0.00000001));
+        const precision_t local_residual_1(eigen_residuals(index++) /
+                                           (weights(point_i) + 0.00000001));
+
+        error(point_i) += local_residual_0 * local_residual_0 +
+                          local_residual_1 * local_residual_1;
+      }
     }
-    index += numframes * 2;
+
+    visible_in_num_frames[point_i] = std::clamp(
+        visible_in_num_frames_local, static_cast<size_t>(1), numframes);
   }
 
+  error = error.cwiseQuotient(visible_in_num_frames);
   reconstruct.reprojection_error = error;
 
   if (not(summary.termination_type == ceres::CONVERGENCE)) {

@@ -35,7 +35,8 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
         std::get<0>(_header_3d_dynamic_landmarks) >>
         std::get<1>(_header_3d_dynamic_landmarks);
   } else {
-    std::cout << "\n\nF A I L E D  READING DYNAMIC_LANDMARKS!\n\n\n";
+    std::cout << "\n\nF A I L E D  READING DYNAMIC_LANDMARKS!\n"
+              << _file_3d_dynamic_landmarks << "\n\n";
   };
 
   // start opening static landmark poses file
@@ -65,7 +66,8 @@ Framesimulator::Framesimulator(const std::string file_camera_poses,
     }
 
   } else {
-    std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n\n\n";
+    std::cout << "\n\nF A I L E D  READING STATIC_LANDMARKS!\n"
+              << _file_3d_static_landmarks << "\n\n";
   };
   fstream_3d_static_landmarks.close();
 };
@@ -169,13 +171,10 @@ void Framesimulator::step() {
     // TODO(dave): work with projected.coord pointer instead of bracket ops
     bool is_in_image(geometry::isInside2dPolygon(
         x_image_coord_local, y_image_coord_local, image_height, image_width));
-    if (is_in_image) {
-      projected.coord[0](point_i) = x_image_coord_local;
-      projected.coord[1](point_i) = y_image_coord_local;
-    } else {
-      projected.coord[0](point_i) = -1;
-      projected.coord[1](point_i) = -1;
-    }
+
+    projected.coord[0](point_i) = x_image_coord_local;
+    projected.coord[1](point_i) = y_image_coord_local;
+    projected.visible[point_i] = (is_in_image ? true : false);
   }
 
   _step_image_points = projected;

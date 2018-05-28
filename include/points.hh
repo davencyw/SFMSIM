@@ -14,11 +14,15 @@ struct Points2d {
   Points2d(size_t numpoints) : numpoints(numpoints) {
     coord[0] = array_t(numpoints);
     coord[1] = array_t(numpoints);
+    visible = std::vector<bool>(numpoints);
   }
 
   size_t numpoints;
   // coordinates on image plane
   std::array<array_t, 2> coord;
+
+  // true if visible
+  std::vector<bool> visible;
 };
 
 // struct for synthetic feature points at timestep with additional type info
@@ -36,11 +40,15 @@ struct Points3d {
     coord[0] = array_t(numpoints);
     coord[1] = array_t(numpoints);
     coord[2] = array_t(numpoints);
+    visible = std::vector<bool>(numpoints);
   }
 
   size_t numpoints;
   // coordinates on image plane
   std::array<array_t, 3> coord;
+
+  // true if visible
+  std::vector<bool> visible;
 };
 
 struct Dynamicpointgroup {
@@ -52,5 +60,5 @@ struct Dynamicpointgroup {
   std::shared_ptr<Points2d> image_coord;
   std::shared_ptr<Points3d> world_coord;
 };
-}  // namespace sfmsimulator::points
+} // namespace sfmsimulator::points
 #endif /* end of include guard: __POINTS_HH__ */

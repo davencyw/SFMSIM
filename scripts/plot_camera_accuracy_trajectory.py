@@ -121,7 +121,7 @@ for file in files:
 title = set+"_cameratrajectory_error"
 plt.title(title)
 plt.xlim(2,numframes+1)
-# plt.ylim(0,5)
+plt.ylim(0,5)
 plt.xticks(range(2,numframes+2,int((numframes+1)/10)))
 plt.xlabel("frame")
 plt.ylabel("error")

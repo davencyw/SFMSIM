@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
 
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep3"};
   std::vector<std::string> testsets{"Tlarge11"};
-  std::string outputfolder("../results/s11/");
+  std::string outputfolder("../results/s12/");
   std::vector<int> classifier_to_test{0, 1, 2};
 
   for (std::string testset : testsets) {

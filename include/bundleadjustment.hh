@@ -15,6 +15,30 @@
 
 namespace sfmsimulator::bundleadjustment {
 
+precision_t ReprojectionError(const precision_t observed_x,
+                              const precision_t observed_y,
+                              const precision_t focal, const vec3_t point3d,
+                              const vec6_t camera) {
+
+  vec3_t point = point3d;
+  // translation
+  point[0] -= camera[3];
+  point[1] -= camera[4];
+  point[2] -= camera[5];
+
+  // perspective divide
+  const precision_t xp = point[0] / point[2];
+  const precision_t yp = point[1] / point[2];
+
+  // compute final projected point position.
+  const precision_t predicted_x = focal * xp;
+  const precision_t predicted_y = focal * yp;
+  // the error is the difference between the predicted and observed position.
+  const precision_t errx = predicted_x - observed_x;
+  const precision_t erry = predicted_y - observed_y;
+  return errx * errx + erry * erry;
+}
+
 struct SimpleReprojectionError {
   SimpleReprojectionError(precision_t observed_x, precision_t observed_y,
                           precision_t weight, precision_t focal)
@@ -168,23 +192,20 @@ Sfmreconstruction adjustBundle(
   array_t visible_in_num_frames = array_t::Ones(numpoints);
 
   // collapse residuals
-  size_t index(0);
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     size_t visible_in_num_frames_local(0);
-    for (size_t frame_i(0); frame_i < numframes; ++frame_i) {
-      // if point visible in frame then there is a residual
-      if (points_frames[frame_i]->visible[point_i]) {
+    size_t framecounter(0);
+    for (auto &points_frame_i : points_frames) {
+      if (points_frames[framecounter]->visible[point_i]) {
         visible_in_num_frames_local++;
-        const precision_t local_residual_0(eigen_residuals(index++) /
-                                           (weights(point_i) + 0.00000001));
-        const precision_t local_residual_1(eigen_residuals(index++) /
-                                           (weights(point_i) + 0.00000001));
-
-        error(point_i) += local_residual_0 * local_residual_0 +
-                          local_residual_1 * local_residual_1;
+        const precision_t uvx(points_frame_i->coord[0](point_i));
+        const precision_t uvy(points_frame_i->coord[1](point_i));
+        error[point_i] += ReprojectionError(uvx - cx, uvy - cy, focal,
+                                            mutable_points3d[point_i],
+                                            mutable_cameraposes[framecounter]);
       }
+      ++framecounter;
     }
-
     visible_in_num_frames[point_i] = std::clamp(
         visible_in_num_frames_local, static_cast<size_t>(1), numframes);
   }

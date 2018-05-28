@@ -19,6 +19,8 @@ struct Sfmreconstruction {
 
 namespace pointclassifier {
 
+void setInvisibleToOldWeights(const array_t &old_weights, array_t &new_weights,
+                              std::shared_ptr<points::Points2d> points);
 enum Pointclassifier_type {
   PC_Noclassifier_t,
   PC_ReprojectionErrorNodep_t,
@@ -31,8 +33,9 @@ enum Pointclassifier_type {
 class Pointclassifier {
 public:
   // classifies points into static and dynamic points
-  virtual void classifynext(const Sfmreconstruction &reconstruct,
-                            array_t &weights) const = 0;
+  virtual void
+  classifynext(const Sfmreconstruction &reconstruct, array_t &weights,
+               const std::shared_ptr<points::Points2d> points) const = 0;
   virtual std::string getDescription() const = 0;
 };
 

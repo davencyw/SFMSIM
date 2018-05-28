@@ -97,6 +97,7 @@ Sfmreconstruction adjustBundle(
 
   size_t skipped(0);
 
+  // TODO(dave): change loop order
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
     mutable_points3d[point_i] =
         vec3_t((*coord_world)[0](point_i), (*coord_world)[1](point_i),
@@ -105,13 +106,13 @@ Sfmreconstruction adjustBundle(
     size_t framecounter(0);
     for (auto &points_frame_i : points_frames) {
 
-      const precision_t uvx(points_frame_i->coord[0](point_i));
-      const precision_t uvy(points_frame_i->coord[1](point_i));
-
-      if (uvx < 0 && uvy < 0) {
+      if (!(points_frame_i->visible[point_i])) {
         ++skipped;
         continue;
       }
+      const precision_t uvx(points_frame_i->coord[0](point_i));
+      const precision_t uvy(points_frame_i->coord[1](point_i));
+
       // std::cout << "RBLOCK:\n"
       //           << uvx << " : " << uvy << "\t||||\t"
       //           << mutable_points3d[point_i][0] << " : "
@@ -168,13 +169,21 @@ Sfmreconstruction adjustBundle(
 
   // collapse residuals
   size_t index(0);
-  for (size_t error_i(0); error_i < numpoints; ++error_i) {
-    for (size_t error_j(0); error_j < numframes * 2; ++error_j) {
-      const precision_t local_residual(eigen_residuals(index + error_j) /
-                                       (weights(error_i) + 0.00000001));
-      error(error_i) += local_residual * local_residual;
+  for (size_t point_i(0); point_i < numpoints; ++point_i) {
+    for (size_t frame_i(0); frame_i < numframes; ++frame_i) {
+      // if point visible in frame then there is a residual
+      if (points_frames[frame_i]->visible[point_i]) {
+        const precision_t local_residual_0(eigen_residuals(index + frame_i) /
+                                           (weights(point_i) + 0.00000001));
+        const precision_t local_residual_1(
+            eigen_residuals(index + frame_i + 1) /
+            (weights(point_i) + 0.00000001));
+
+        error(point_i) += local_residual_0 * local_residual_0 +
+                          local_residual_1 * local_residual_1;
+        index += 2;
+      }
     }
-    index += numframes * 2;
   }
 
   reconstruct.reprojection_error = error;

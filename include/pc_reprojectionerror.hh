@@ -39,8 +39,9 @@ struct PC_ReprojectionErrorNodep : public Pointclassifier {
 
   std::string getDescription() const { return "Reprojectionerror Nodep"; }
 
-  void classifynext(const Sfmreconstruction &reconstruct,
-                    array_t &weights) const override {
+  void
+  classifynext(const Sfmreconstruction &reconstruct, array_t &weights,
+               const std::shared_ptr<points::Points2d> points) const override {
 
     array_t new_weights = reconstruct.reprojection_error;
     /*DEBUG*/ array_t residuals = reconstruct.reprojection_error;
@@ -51,7 +52,7 @@ struct PC_ReprojectionErrorNodep : public Pointclassifier {
     constexpr precision_t expweightdist(0.5);
     ExponentialWeighting(reproject_error_tolerance, reproject_error_max,
                          expweightdist, new_weights);
-
+    setInvisibleToOldWeights(weights, new_weights, points);
     weights = new_weights;
     return;
   }
@@ -60,8 +61,9 @@ struct PC_ReprojectionErrorNodep : public Pointclassifier {
 struct PC_ReprojectionErrorDep3 : public Pointclassifier {
   std::string getDescription() const { return "Reprojectionerror Dep3"; }
 
-  void classifynext(const Sfmreconstruction &reconstruct,
-                    array_t &weights) const override {
+  void
+  classifynext(const Sfmreconstruction &reconstruct, array_t &weights,
+               const std::shared_ptr<points::Points2d> points) const override {
     array_t new_weights = reconstruct.reprojection_error;
 
     // set tolerance
@@ -74,7 +76,9 @@ struct PC_ReprojectionErrorDep3 : public Pointclassifier {
 
     // dependency on old weights
     const array_t diff = new_weights - weights;
-    weights = weights + diff * 0.5;
+    new_weights = weights + diff * 0.5;
+    setInvisibleToOldWeights(weights, new_weights, points);
+    weights = new_weights;
   }
 };
 

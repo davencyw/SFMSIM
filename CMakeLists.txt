@@ -73,6 +73,7 @@ file(GLOB FRAMESIMSOURCES
 
 file(GLOB SFMSIMULATORSOURCES
 		src/sfmsimulator/*.cc
+		src/pointclassifier/pointclassifier.cc
 )
 
 file(GLOB VISUALIZERSOURCES

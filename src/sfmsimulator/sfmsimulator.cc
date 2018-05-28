@@ -165,7 +165,8 @@ void Sfmsimulator::step() {
   // classify points
   if (_pointclassifier) {
     // classify and reconstruct with only static points
-    _pointclassifier->classifynext(reconstruct, _weights);
+    _pointclassifier->classifynext(reconstruct, _weights,
+                                   _scene_window_image.back());
   }
 
   // write camera estimates to output

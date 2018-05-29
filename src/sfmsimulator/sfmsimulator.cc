@@ -41,6 +41,11 @@ Sfmsimulator::Sfmsimulator(Sfmconfig config)
          "__"
          "\n\n\n";
 
+  std::cout << "input data:\n"
+            << config.filepaths[0] << "\n"
+            << config.filepaths[1] << "\n"
+            << config.filepaths[2] << "\n\n";
+
   using pct = pointclassifier::Pointclassifier_type;
 
   switch (config.type_pointclassifier) {
@@ -118,7 +123,6 @@ void Sfmsimulator::updateSlidingWindow() {
   if (_scene_window_image.size() > _config.slidingwindow_size) {
     _scene_window_image.pop_front();
     _scene_window_cameraposes.pop_front();
-    _hold_first_camera = false;
   }
 }
 
@@ -141,7 +145,7 @@ void Sfmsimulator::run() {
 }
 
 void Sfmsimulator::step() {
-  std::cout << " - STEP[ " << _step << " ]\n";
+  std::cout << "\r - STEP[ " << _step << " ]" << std::flush;
 
   updateSlidingWindow();
 
@@ -156,11 +160,16 @@ void Sfmsimulator::step() {
   }
 
   Sfmreconstruction reconstruct = bundleadjustment::adjustBundle(
-      frames, _world_points, cameraposes, _cameramodel, _weights,
-      _hold_first_camera);
+      frames, _world_points, cameraposes, _cameramodel, _weights);
 
   // push back estimates
   _scene_full_camera_estimate.push_back(reconstruct.camerapose_estimate);
+
+  // rewrite _scene_window_cameraposes with estimates
+  _scene_window_cameraposes.clear();
+  for (auto &camera_i : reconstruct.camerapose_estimate) {
+    _scene_window_cameraposes.push_back(camera_i);
+  }
 
   // classify points
   if (_pointclassifier) {

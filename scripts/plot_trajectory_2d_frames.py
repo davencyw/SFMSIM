@@ -28,6 +28,8 @@ for classifier in classifiers:
 
     file = set+"_"+classifier+"_camera.csv"
     file_gt = set+"_"+classifier+"_camera_gt.csv"
+    if os.path.isfile(file) == False :
+        continue
 
 
     df = pd.read_csv(os.path.join(filepath,file), delimiter=" ", header=None)
@@ -72,6 +74,8 @@ for classifier in classifiers:
 
         ###scale
         averagescale=0
+        totaldist=0
+        totalgtdist=0
         #loop over every pair and average scaling
         numpairs = currentslidingwindowsize -1
         for pair_i in range(0,numpairs):
@@ -82,10 +86,15 @@ for classifier in classifiers:
 
             gtdist = distance.euclidean(pt1gt,pt2gt)
             dist = distance.euclidean(pt1,pt2)
-            localscale = dist / gtdist
-            averagescale += localscale
+            totaldist += dist
+            totalgtdist += gtdist
+            # localscale = dist / gtdist
+            # averagescale += localscale
 
-        averagescale /= float(numpairs)
+        averagedist = totaldist / float(numpairs)
+        averagegtdist = totalgtdist / float(numpairs)
+        averagescale = averagedist / averagegtdist
+        # averagescale /= float(numpairs)
         localcam /= averagescale
         ###end scale
 

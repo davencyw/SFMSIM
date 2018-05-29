@@ -98,8 +98,7 @@ Sfmreconstruction adjustBundle(
     const std::vector<std::shared_ptr<points::Points2d>> &points_frames,
     const std::shared_ptr<points::Points3d> &points_world,
     const std::vector<vec6_t> &cameraposes,
-    const cameramodel::Cameramodel &camera, const array_t &weights,
-    const bool set_first_camera_const) {
+    const cameramodel::Cameramodel &camera, const array_t &weights) {
 
   // Create residuals for each observation in the bundle adjustment problem.
   // The
@@ -157,14 +156,12 @@ Sfmreconstruction adjustBundle(
     }
   }
 
-  if (set_first_camera_const) {
-    // translation is fixed in first camera
-    const std::vector<int> const_indices = {3, 4, 5};
-    ceres::SubsetParameterization *subset_parameterization =
-        new ceres::SubsetParameterization(6, const_indices);
-    problem.SetParameterization(mutable_cameraposes[0].data(),
-                                subset_parameterization);
-  }
+  // translation is fixed in first camera of slidingwindow
+  const std::vector<int> const_indices = {3, 4, 5};
+  ceres::SubsetParameterization *subset_parameterization =
+      new ceres::SubsetParameterization(6, const_indices);
+  problem.SetParameterization(mutable_cameraposes[0].data(),
+                              subset_parameterization);
 
   if (skipped) {
     std::cout << "\nskipped " << skipped << " points\n";

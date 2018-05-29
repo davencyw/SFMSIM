@@ -53,7 +53,7 @@ static = np.column_stack((staticx,staticy,staticz))
 dynamic = np.column_stack((dynamicx,dynamicy,dynamicz))
 
 dynpointsstaticstart = int(numframes * 0.25)-1
-dynpointsstaticstop  = int(numframes * 0.75)-1
+dynpointsstaticstop  = int(numframes * 1.75)-1
 
 dynamicframe = dynamic
 for frame in range(0,numframes-1):

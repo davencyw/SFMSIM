@@ -13,15 +13,23 @@ folder = sys.argv[1]
 numstatic = int(sys.argv[2])
 numdynamic = int(sys.argv[3])
 numframes = int(sys.argv[4])
+dynsamedirection = bool(sys.argv[5])
+startstatic = float(sys.argv[6])
+stopstatic = float(sys.argv[7])
+
+dynpointsstaticstart = int(numframes * startstatic)-1
+dynpointsstaticstop  = int(numframes * stopstatic)-1
 
 filestatic  = folder + "/landmark_static_3d.csv"
 filedynamic = folder + "/landmark_dynamic_3d.csv"
 filecamera = folder + "/camera_poses.csv"
 
-print "\nfolder                   : " + folder
-print "number of static points  : " + str(numstatic)
-print "number of dynamic points : " + str(numdynamic)
-print "number of frames         : " + str(numframes) + "\n\n"
+print "\nfolder                                : " + folder
+print "number of static points               : " + str(numstatic)
+print "number of dynamic points              : " + str(numdynamic)
+print "number of frames                      : " + str(numframes)
+print "dynamic points static between         : " + str(dynpointsstaticstart) + " and " + str(dynpointsstaticstop)
+print "dynamic points move in same direction : " + str(dynsamedirection) + "\n\n"
 
 dynamic_image  = np.empty((numdynamic,0))
 diff     = np.empty((numdynamic,0))
@@ -52,12 +60,15 @@ dynamicy = dynamicy * dynamicz
 static = np.column_stack((staticx,staticy,staticz))
 dynamic = np.column_stack((dynamicx,dynamicy,dynamicz))
 
-dynpointsstaticstart = int(numframes * 0.25)-1
-dynpointsstaticstop  = int(numframes * 1.75)-1
-
 dynamicframe = dynamic
 for frame in range(0,numframes-1):
-    diffxy = np.random.uniform(low=-2, high=2, size=(numdynamic,2))
+    if dynsamedirection:
+        rand = np.random.uniform(low=0,high=2)
+        diffxy = np.ones((numdynamic,2))
+        diffxy *= rand
+    else :
+        diffxy = np.random.uniform(low=-2, high=2, size=(numdynamic,2))
+
     diffz = np.random.uniform(low=-0.1, high=0.2, size=(numdynamic,1))
     diff = np.append(diffxy, diffz, axis=1)
     if frame > dynpointsstaticstart and frame < dynpointsstaticstop :

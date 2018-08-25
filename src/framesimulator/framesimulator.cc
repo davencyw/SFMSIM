@@ -161,11 +161,7 @@ void Framesimulator::step() {
     precision_t x_image_coord_local = pt_h(0) / pt_h(2);
     precision_t y_image_coord_local = pt_h(1) / pt_h(2);
 
-    // std::cout << point_vec4[0] << " : " << point_vec4[1] << " : "
-    //           << point_vec4[2] << "\t||||\t" << x_image_coord_local << " : "
-    //           << y_image_coord_local << "\n";
-
-
+ 
     // TODO(dave): do this polygon check outside of the loop for efficiency
     // TODO(dave): work with projected.coord pointer instead of bracket ops
     bool is_in_image(geometry::isInside2dPolygon(

@@ -137,14 +137,6 @@ Sfmreconstruction adjustBundle(
       const precision_t uvx(points_frame_i->coord[0](point_i));
       const precision_t uvy(points_frame_i->coord[1](point_i));
 
-      // std::cout << "RBLOCK:\n"
-      //           << uvx << " : " << uvy << "\t||||\t"
-      //           << mutable_points3d[point_i][0] << " : "
-      //           << mutable_points3d[point_i][1] << " : "
-      //           << mutable_points3d[point_i][2] << "\tc: " << framecounter
-      //           << "\n"
-      //           << mutable_cameraposes[framecounter] << "\n\n";
-
       ceres::CostFunction *cost_function = SimpleReprojectionError::Create(
           uvx - cx, uvy - cy, weights(point_i), focal);
 
@@ -216,16 +208,6 @@ Sfmreconstruction adjustBundle(
     return empty;
   }
 
-  /*DEBUG/
-  for (auto &c : mutable_cameraposes) {
-    std::cout << "\n" << c << "\n";
-  }*/
-
-  /*DEBUG/
-  for (auto &p : mutable_points3d) {
-    std::cout << "\n" << p << "\n";
-  }*/
-
   std::shared_ptr<points::Points3d> world_estimate =
       std::make_shared<points::Points3d>(points::Points3d(numpoints));
   for (size_t point_i(0); point_i < numpoints; ++point_i) {
@@ -243,6 +225,6 @@ Sfmreconstruction adjustBundle(
   return reconstruct;
 }
 
-} /* sfmsimulator::bundleadjustment */
+} // namespace sfmsimulator::bundleadjustment
 
 #endif /* end of include guard: __BUNDLEADJUSTMENT_HH__ */

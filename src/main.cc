@@ -1,22 +1,19 @@
 #include <sfmsimulator.hh>
 
+#include <cmdparser.hh>
+
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "boost/program_options.hpp"
-
 int main(int argc, char const *argv[]) {
-  // TODO(dave): add boost program options to properly parse the input
-
   std::vector<std::string> classifier_names{"noclassifier", "nodep", "dep3"};
-  std::vector<std::string> testsets{"Tlarge15", "Tlarge16"};
-  std::string outputfolder("../results/s11/");
-  std::vector<int> classifier_to_test{0, 1, 2};
 
-  for (std::string testset : testsets) {
+  InputConfig inputconfig = parseOptions(argc, argv);
+
+  for (std::string testset : inputconfig.testsets) {
 
     std::string folder("../data/" + testset);
     std::string camera_poses(folder + "/camera_poses.csv");
@@ -35,9 +32,9 @@ int main(int argc, char const *argv[]) {
     config.slidingwindow_size = 50;
 
     // iterate over classifiers
-    for (int classifier_i : classifier_to_test) {
-      config.filepaths[3] =
-          outputfolder + testset + "_" + classifier_names[classifier_i];
+    for (int classifier_i : inputconfig.classifier_to_test) {
+      config.filepaths[3] = inputconfig.outputfolder + testset + "_" +
+                            classifier_names[classifier_i];
       config.type_pointclassifier =
           sfmsimulator::pointclassifier::Pointclassifier_type(classifier_i);
       sfmsimulator::Sfmsimulator sfmsim(config);

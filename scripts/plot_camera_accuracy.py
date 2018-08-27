@@ -8,7 +8,7 @@ import numpy as np
 import os
 import fnmatch
 
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"
+filepath = "../results/"
 
 set = sys.argv[1]
 print "Set: " + set

@@ -4,13 +4,20 @@ This structure from motion simulator is created as a workspace to test classific
 # Building
 This project is built and tested with g++ (Debian 7.3.0-16) 7.3.0 (should work on other unix systems aswell).
 
-## Dependencies
+## Dependencies Simulator
 - c++17
 - Ceres
 - OpenCV
 - OpenCV contrib modules (OpenCV_SFM)
 - Eigen
 - Boost (program_options)
+
+## Dependencies Plotting
+- pandas
+- Numpy
+- scipy
+- matplotlib
+- seaborn
 
 ## Build with CMake
 ```bash
@@ -20,22 +27,27 @@ make -j4
 ```
 
 # Run the Simulation
+For a quick test-run follow [Summary](#summary).
 ## Generate Dynamic/Static Features and Cameraposes
 Run the genpoints.py in the ```scripts``` folder to generate feature points with the following arguments:
 ```python
 python genpoints.py <outputfolder> <numstaticfeatures> <numdynamicfeatures> <numframes> <movement> <startstatic> <stopstatic>
 ```
 
-For example to generate a dataset of 30 static points and 20 dynamic (which move in random directions) for 120 frames:
+For example to generate a dataset of 30 static points and 20 dynamic (which move in random directions) for 120 frames in the dataset D0 (folder has to exist):
 ```python
-python genpoints.py ../data 30 20 120 false 1 1
+python genpoints.py ../data/D0 30 20 120 false 1 1
 ```
 ## Run sfmsimulator
-Just call the executable with the following arguments.
+Just call the executable from the build folder (important!) with the following arguments.
 ```bash
 cd build
-./bin/sfmsimulation -o <outputfolder> -c <classifier1> -c <classifier2> -t <dataset1> -t <dataset2>
+./bin/sfmsimulation -o <outputfolder> -c <classifier1> -c <classifier2> -t <dataset1> -t <dataset2> ...
 ```
+
+* -c 0 (= no classifier)
+* -c 1 (= no dependency classifier)
+* -c 2 (= dependecy "*dep3"* classifier)
 
 ## Plot data
 These python scripts use pandas, seaborn, scipy, numpy and matplotlib to plot different data to analyse and evaluate the method mentioned above.
@@ -55,4 +67,17 @@ python plot_average.py run0 dataset0 20
 ### Plot Camera Trajectory Accuracy
 ```python
 python plot_camera_accuracy.py <dataset>
+```
+
+# Summary
+Example test-run for the *"dep3"* classifier:
+```bash
+mkdir build && cd build
+cmake ..
+make -j4
+mkdir -p ../data/D0
+mkdir -p ../results/R0
+./bin/sfmsimulation -o ../results/R0/ -c 0 -c 1 -c 2 -t D0
+python ../scripts/plot_average.py R0 D0 20
+
 ```

@@ -11,10 +11,12 @@ setting = sys.argv[1]
 set = sys.argv[2]
 numdyn = int(sys.argv[3])
 
-filepath = "/media/davencyw/diskdata/mthesis/code/sfmsim/results/"+setting+"/"
-
+filepath = "../results/"+setting+"/"
+print filepath
 for file in os.listdir(filepath):
+    print file
     if fnmatch.fnmatch(file, '*weights.csv') and fnmatch.fnmatch(file, set+'*'):
+        print file
 
         split = file.split("_")
         dep = split[1]

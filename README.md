@@ -70,7 +70,7 @@ python plot_camera_accuracy.py <dataset>
 ```
 
 # Summary
-Example test-run for the *"dep3"* classifier:
+This example test-run for all classifiers prints the average weights for each classifier for each frame:
 ```bash
 mkdir build && cd build
 cmake ..

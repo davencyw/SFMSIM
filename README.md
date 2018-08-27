@@ -54,6 +54,8 @@ These python scripts use pandas, seaborn, scipy, numpy and matplotlib to plot di
 
 First, one has to change the filepaths to the result folder. In this result folder the output of the simulator should lie in a seperate folder for each run. Eg: ```<path>/result/run0```.
 
+Look around in the scripts folder to plot frames of the trajectory or other data for the evaluation.
+
 ### Plot Average Weight of Features
 ```python
 python plot_average.py <run> <dataset> <numberofdynamicpoints>

@@ -77,6 +77,7 @@ cmake ..
 make -j4
 mkdir -p ../data/D0
 mkdir -p ../results/R0
+python ../scripts/genpoints.py ../data/D0 50 20 60 false 1 1
 ./bin/sfmsimulation -o ../results/R0/ -c 0 -c 1 -c 2 -t D0
 python ../scripts/plot_average.py R0 D0 20
 
